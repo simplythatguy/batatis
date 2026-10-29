@@ -26,6 +26,8 @@ export function exportVideo(opts: {
   signal?: AbortSignal;
   /** Paint into this visible canvas, so the render screen shows the video as it is made. */
   canvas?: HTMLCanvasElement;
+  /** false leaves out the intro and outro cards, for one group on its own. */
+  cards?: boolean;
 }): Promise<{ blob: Blob; mime: string }> {
   return renderVideo(opts);
 }

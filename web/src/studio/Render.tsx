@@ -12,7 +12,7 @@ type State =
   | { k: "done"; url: string; mime: string; ms: number; poster: string }
   | { k: "failed"; message: string };
 
-async function takeMedia(room: string, info: TakeInfo, onBytes: (n: number) => void, signal: AbortSignal): Promise<TakeMedia> {
+export async function takeMedia(room: string, info: TakeInfo, onBytes: (n: number) => void, signal: AbortSignal): Promise<TakeMedia> {
   const cached = await takeCache.byTakeId(info.id);
   if (cached && cached.blob.size === info.size) {
     onBytes(info.size);

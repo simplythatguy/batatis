@@ -2,9 +2,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { startRecording, type Recording } from "./recorder";
-import { Render } from "./Render";
+import { Render, takeMedia } from "./Render";
 import { roomApi } from "./room";
-import { createStage, preload, type Stage } from "./stage";
+import { createStage, exportVideo, preload, type Stage } from "./stage";
 import { Cams } from "./Cams";
 import { Filmstrip, groupColor } from "./Filmstrip";
 import { Brand, CopyLink, firstName, initials, type Camera } from "./parts";
@@ -235,6 +235,29 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, preview, setPre
   const presenter = follow ? room.people.find((p) => p.id === follow.presenterId) : undefined;
   const following = !!follow;
 
+  // One group on its own as a finished video: its slides, clips and the presenter, no intro or outro.
+  const [saving, setSaving] = useState<number | null>(null);
+  const saveVideo = async () => {
+    if (saving !== null) return;
+    setSaving(0);
+    try {
+      const media = phase.k === "review" ? phase.media
+        : take && complete(take) ? await takeMedia(room.code, take, () => undefined, new AbortController().signal) : null;
+      if (!media) return;
+      await preload(deck);
+      const { blob, mime } = await exportVideo({ deck, takes: { [group.id]: media }, cards: false, onProgress: (f) => setSaving(f) });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `batatis-${group.id}.${mime.includes("mp4") ? "mp4" : "webm"}`;
+      a.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } finally {
+      setSaving(null);
+    }
+  };
+  const canSave = phase.k === "review" || (phase.k === "idle" && complete(take));
+
   const clearTimers = () => {
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
@@ -452,6 +475,12 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, preview, setPre
           ) : (
             <button type="button" className="cf-btn is-lg" onClick={() => onAssign(me.id)}>Record this one</button>
           ))}
+          {phase.k === "idle" && !follow && canSave && (
+            <button type="button" className="cf-btn is-lg" onClick={() => void saveVideo()} disabled={saving !== null}>
+              <Icon name="download" size={16} />{saving === null ? "Download video" : `Rendering ${Math.round(saving * 100)}%`}
+            </button>
+          )}
+          {phase.k === "review" && saving !== null && <span className="st-step-n">Rendering {Math.round(saving * 100)}%</span>}
           {phase.k === "countdown" && (
             <button type="button" className="cf-btn is-lg" onClick={cancel}>Cancel<kbd className="cf-kbd">Esc</kbd></button>
           )}
@@ -469,6 +498,9 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, preview, setPre
                 <Icon name="restart" size={15} />Retake
               </button>
               <span className="st-review-more">
+                <button type="button" className="cf-icon-btn" onClick={() => void saveVideo()} disabled={saving !== null} aria-label="Download this group's video" title="Download this group's video">
+                  <Icon name="download" size={16} />
+                </button>
                 <button type="button" className="cf-icon-btn" onClick={again} aria-label="Play again" title="Play again">
                   <Icon name="play" size={16} />
                 </button>
