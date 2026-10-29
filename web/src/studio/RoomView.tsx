@@ -118,6 +118,7 @@ export function Room({ deck, room, serverLive, me, camera, apply, onLeave }: {
 
   return (
     <div className="st-room">
+      <header className="st-top">
       <Brand as="span" />
       <Cams
         people={room.people}
@@ -151,6 +152,7 @@ export function Room({ deck, room, serverLive, me, camera, apply, onLeave }: {
           </button>
         )}
       </div>
+      </header>
 
       {rendering ? (
         <div className="st-render">

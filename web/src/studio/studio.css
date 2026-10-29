@@ -283,7 +283,7 @@
   grid-template-columns: clamp(176px, 13vw, 224px) minmax(0, 1fr) clamp(300px, 22vw, 400px);
   grid-template-rows: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    "brand cams corner"
+    "top top top"
     "ctl stage script"
     "strip strip strip";
   column-gap: 40px;
@@ -292,18 +292,25 @@
   overflow: hidden;
 }
 
-.st-room > .st-brand {
-  grid-area: brand;
-  align-self: center;
+/* Top bar: brand, the webcams (they shrink, then scroll) and the controls, which never get covered. */
+.st-top {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.st-top > .st-brand {
+  flex: none;
 }
 
 .st-corner {
-  grid-area: corner;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 16px;
-  min-width: 0;
+  gap: 14px;
 }
 
 .st-total {
@@ -332,7 +339,7 @@
 /* Cameras */
 
 .st-cams {
-  grid-area: cams;
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,7 +355,7 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 160px;
+  width: clamp(112px, 10vw, 160px);
   aspect-ratio: 16 / 9;
   margin: 0;
   border-radius: 10px;
