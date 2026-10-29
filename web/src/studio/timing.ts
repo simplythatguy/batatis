@@ -4,13 +4,18 @@ import { type Deck, type Group, WORDS_PER_MINUTE } from "./types";
 export const INTRO_MS = 4200;
 export const OUTRO_MS = 4000;
 
+/** Spoken words only: reading cues (emoji) are not words. */
 export function words(text: string): number {
-  return text.trim().split(/\s+/).filter(Boolean).length;
+  return text.trim().split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 }
+
+/** A ⏸️ in a script is a half-second beat. */
+export const BEAT_MS = 500;
 
 /** How long one script segment takes at the studio pace, in ms. */
 export function segmentMs(text: string): number {
-  return Math.round((words(text) / WORDS_PER_MINUTE) * 60_000);
+  const beats = text.match(/⏸/g)?.length ?? 0;
+  return Math.round((words(text) / WORDS_PER_MINUTE) * 60_000) + beats * BEAT_MS;
 }
 
 /** A group's recording length: its words at 120 wpm plus a one-second breath. */
