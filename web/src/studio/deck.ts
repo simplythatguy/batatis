@@ -83,7 +83,7 @@ export const deck: Deck = {
       ],
       script: [
         "🙂 We describe the rowhouse in plain words and drop in the broken form.",
-        "🙂 It reads both and finds the owner, the site and the city.",
+        "🙂 It reads both and finds the site, the city and every safety measure.",
         "🙂 Here are the rules it found, ranked. ⏸️ 😮 At the TOP... the exact rule we deleted. 😄 Isn't that COOL? Ten runs out of ten.",
         "🙂 Then it asks ONLY for what's still missing, one question at a time.",
       ],
