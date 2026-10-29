@@ -165,6 +165,8 @@ interface Store {
   resetNote: string;
   dispatch: Dispatch<Action>;
   saveDraft: () => Promise<string | null>;
+  /** Run another versioned write (history, signatures, consent) in the save queue, so versions advance one at a time. */
+  queueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   /** Save this displayed revision and submit it in the same queue. Rejects unacknowledged or stale work. */
   submitDraft: (caseId: string) => Promise<void>;
   submitting: boolean;
@@ -2043,6 +2045,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     readSync: () => syncState.current,
     engineId, applicationIdentity: JSON.stringify([renderGeneration, renderSession, engineId]), applicationStatus, factsEpoch, phase, resetNote, dispatch,
     saveDraft: () => sync(),
+    queueWrite: enqueue,
     refreshCurrentCase,
     submitDraft, submitting, submissionDispatched,
     beginEmpty: (type) => {
