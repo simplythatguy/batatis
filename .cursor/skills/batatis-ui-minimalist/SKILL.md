@@ -15,7 +15,7 @@ For each word, line, icon and control ask: does the person need it **now** to ta
 
 1. **Icons before words.** Navigation, stages, status and counts are icons (with a ring, dot or badge for state); the name is the accessible name and a label on hover or keyboard focus, not a persistent row of text. Keep a visible word only where an icon would be ambiguous.
 2. **Visual first.** A dot, icon, count, ring, colour or progress bar carries the meaning; the words left are short labels (one to three words), not explanations.
-3. **One thing at a time.** One question, one job and one primary action (neutral near-black) per screen. Secondary actions go in ⋯ or a ghost button.
+3. **One thing at a time.** One question, one job and one primary action (Mercury indigo `#5266EB`, user decision 2026-10-29) per screen. Secondary actions go in ⋯ or a ghost button.
 4. **Progressive disclosure.** Reasons, detail, history, code text and technical text sit one click or hover away: tooltip, drawer, `<details>`, the next screen.
 5. **Compact metadata.** Icon then number (a message icon and `2`), never "2 new messages". The number always has its icon; a zero shows nothing.
 6. **Breathing room.** Generous padding (sidebar rows `14px 16px`), selection as a soft fill, no decorative lines, edge bars or borders.
@@ -45,7 +45,7 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: stage navigation
 
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
-- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time).
+- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a finished stage fades back (no check badge, user decision 2026-10-29), a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time).
 - Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`.
 
 ## Example: the officer's review

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { CodeToc } from "../api/codeLibrary.ts";
-import { reflow, ancestorsOf, BAND_LABEL, bandFor, cutoffsOf, DEFAULT_BANDS, filterKeep, maxOf, partArticles, pruneToc, rankedIn, sectionArticles, shownFor, strongestOf } from "./relevance.ts";
+import { reflow, ancestorsOf, BAND_LABEL, bandFor, cutoffsOf, DEFAULT_BANDS, filterBands, filterKeep, filterOf, maxOf, partArticles, pruneToc, rankedIn, sectionArticles, shownFor, strongestOf } from "./relevance.ts";
 import { codeHref, resolveRoute } from "./routes.ts";
 
 const C = { rated: true, x: 0.2, y: 0.6, fallback: false } as const;
@@ -139,6 +139,17 @@ test("filters prune branches with no matching article", () => {
   assert.deepEqual(rankedIn({ a: 0.61, b: 0.9, c: 0.3, d: 0 }, cutoffsOf(HISTORICAL), ["high", "mid"]).map((r) => r.id), ["b", "a", "c"]);
 });
 
+test("band toggles combine, and the grey one keeps unlikely and unscored articles", () => {
+  const display = { "9.27.3.4.": 0.72, "9.25.2.2.": 0.3, "9.27.1.1.": 0.05 };
+  const both = filterKeep("attention,maybe", display, C);
+  assert.deepEqual(["9.27.3.4.", "9.25.2.2.", "9.27.1.1.", "9.27.3.5."].map(both), [true, true, false, false]);
+  const grey = filterKeep("other", display, C);
+  assert.deepEqual(["9.27.3.4.", "9.25.2.2.", "9.27.1.1.", "9.27.3.5."].map(grey), [false, false, true, true]);
+  assert.equal(filterOf(new Set()), "all", "no toggle on shows everything");
+  assert.equal(filterOf(["other", "attention"]), "attention,other", "the order is canonical");
+  assert.deepEqual([...filterBands("maybe,bogus")], ["maybe"]);
+});
+
 test("tree ancestors auto-expand to an article", () => {
   assert.deepEqual(ancestorsOf(TOC, "9.27.3.4."), ["part-9", "9.27.", "9.27.3."]);
   assert.deepEqual(ancestorsOf(TOC, "9.27.1.1."), ["part-9", "9.27."]);
@@ -152,6 +163,8 @@ test("code library routes parse the article and filter", () => {
   assert.equal(r.filter, "attention");
   assert.equal(resolveRoute("/code", new URLSearchParams()).article, null);
   assert.equal(resolveRoute("/code", new URLSearchParams("filter=bogus")).filter, "");
+  assert.equal(resolveRoute("/code", new URLSearchParams("filter=other,attention")).filter, "attention,other");
+  assert.equal(resolveRoute("/code", new URLSearchParams("filter=all")).filter, "all");
   assert.equal(codeHref("9.27.3.4."), "#/code/9.27.3.4.");
   assert.equal(codeHref("9.27.3.4.(1)", "maybe"), "#/code/9.27.3.4.(1)?filter=maybe");
   const back = codeHref("9.27.3.4.(1)").replace(/^#/, "");

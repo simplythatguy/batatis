@@ -17,7 +17,7 @@
 }
 .aw-step[aria-current] { opacity: 1; font-weight: 500; }
 .aw-step:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 1px; opacity: 0.85; }
-.aw-step-count { font: 500 11px var(--cf-mono); color: var(--cf-text-3); font-variant-numeric: tabular-nums; }
+.aw-step-count { font: 500 11.5px var(--cf-font); color: var(--cf-text-3); font-variant-numeric: tabular-nums; }
 @media (hover: hover) { .aw-step:not([aria-current]):hover { opacity: 0.85; } }
 .aw-bar-tools { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 .aw-tool {
@@ -29,7 +29,7 @@
 @media (hover: hover) { .aw-tool:not(:disabled):hover { background: var(--cf-hover); color: var(--cf-text); } }
 .aw-tool-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--cf-pending); }
 .aw-zoom { display: flex; align-items: center; margin-right: 4px; }
-.aw-zoom-value { min-width: 40px; text-align: center; font: 11px var(--cf-mono); color: var(--cf-text-3); font-variant-numeric: tabular-nums; }
+.aw-zoom-value { min-width: 40px; text-align: center; font: 11.5px var(--cf-font); color: var(--cf-text-3); font-variant-numeric: tabular-nums; }
 .aw-status { display: inline-flex; align-items: center; gap: 7px; margin-left: 8px; padding: 0 12px; height: 28px; border-radius: 999px; border: 1px solid var(--cf-line); font-size: 12px; color: var(--cf-text-2); white-space: nowrap; }
 
 /* ---------- Edit: index + paper ---------- */
@@ -130,7 +130,7 @@
   background: rgba(17, 24, 39, 0.05); border-radius: 3px; padding: 0 1px;
 }
 .aw-sugg-bar { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
-.aw-sugg-tag { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; font: 11px var(--cf-mono); color: var(--cf-text-3); }
+.aw-sugg-tag { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; font: 12px var(--cf-font); color: var(--cf-text-3); }
 .aw-sugg-accept, .aw-sugg-reject { height: 28px; padding: 0 12px; border-radius: 999px; font: 500 12.5px var(--cf-font); cursor: pointer; transition: transform 120ms var(--cf-ease); }
 .aw-sugg-accept { border: 0; background: var(--cf-primary-bg); color: var(--cf-primary-text); }
 .aw-sugg-reject { border: 1px solid var(--cf-line-2); background: transparent; color: var(--cf-text-2); }
@@ -197,21 +197,23 @@
 .aw-card { background: var(--cf-surface); border-radius: var(--cf-r-card); box-shadow: var(--cf-shadow), 0 0 0 1px var(--cf-line); }
 .aw-empty-card { padding: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .aw-empty-card p { margin: 0; }
-.aw-title { margin: 18px 0 18px; font-size: 30px; font-weight: 600; letter-spacing: -0.03em; }
+.aw-title { margin: 18px 0 18px; font-size: 28px; font-weight: 400; letter-spacing: -0.015em; }
 .aw-chip {
-  display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--cf-line);
+  display: inline-flex; align-items: center; gap: 7px; height: 24px; padding: 0 8px; border-radius: 4px; border: 0; background: var(--cf-fill);
   font-size: 12px; color: var(--cf-text-3); white-space: nowrap;
 }
 .aw-chip.is-done { color: var(--cf-done-ink); }
 .aw-chip.is-warning { color: var(--cf-warning-ink); }
 .aw-count {
-  display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 4px; border-radius: 999px;
-  background: rgba(17, 24, 39, 0.07); font: 600 12px var(--cf-mono); font-variant-numeric: tabular-nums;
+  display: inline-grid; place-items: center; min-width: 22px; height: 20px; padding: 0 6px; margin-left: 4px; border-radius: 4px;
+  background: var(--cf-fill); font: 500 12px var(--cf-font); font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Sign ---------- */
 .aw-sign { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-.aw-consent { padding: 16px 20px; }
+/* Sign is one column: consent, then each signer, split by hairlines rather than a card each. */
+.aw-sign .aw-card { border-radius: 0; background: none; box-shadow: none; border-bottom: 1px solid var(--cf-line); }
+.aw-consent { padding: 4px 0 20px; }
 .aw-consent label { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; cursor: pointer; }
 .aw-consent details { margin: 6px 0 0 28px; font-size: 12.5px; color: var(--cf-text-3); }
 .aw-consent summary { cursor: pointer; width: fit-content; }
@@ -223,13 +225,13 @@
 .aw .aw-check:checked { background: var(--cf-primary-bg); border-color: var(--cf-primary-bg); }
 .aw .aw-check:checked::after { content: ""; width: 8px; height: 4px; margin-top: -2px; border: solid #fff; border-width: 0 0 1.6px 1.6px; transform: rotate(-45deg); }
 .aw .aw-check:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 2px; }
-.aw-signer { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 12px; }
+.aw-signer { padding: 20px 0; display: flex; flex-direction: column; gap: 12px; }
 .aw-signer header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.aw-signer h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.aw-signer h2 { margin: 0; font-size: 15px; font-weight: 500; }
 .aw-signer header p { margin: 2px 0 0; font-size: 12.5px; color: var(--cf-text-3); }
 .aw-slot {
   display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 104px; border: 1px dashed var(--cf-line-ctl);
-  border-radius: 12px; background: transparent; color: var(--cf-text-2); font: 500 14px var(--cf-font); cursor: pointer;
+  border-radius: 8px; background: var(--cf-field); color: var(--cf-text-2); font: 500 14px var(--cf-font); cursor: pointer;
   transition: background-color 150ms var(--cf-ease), border-color 150ms var(--cf-ease);
 }
 button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 2px; }
@@ -271,7 +273,7 @@ button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offse
 .aw-attest { margin: 12px 0 0; font-size: 12px; line-height: 1.55; color: var(--cf-text-3); }
 
 /* ---------- Send ---------- */
-.aw-send { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; padding: 0 20px 0 24px; }
+.aw-send { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 28px; padding: 0 24px 0 32px; }
 .aw-package-preview { min-height: 0; display: flex; flex-direction: column; }
 .aw-preview-bar { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; height: 36px; font-size: 12.5px; color: var(--cf-text-2); }
 .aw-package-pages { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 0 60px; outline: none; }
@@ -282,18 +284,20 @@ button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offse
 .aw-preview-empty { flex: 1; display: grid; place-items: center; align-content: center; gap: 10px; color: var(--cf-text-3); font-size: 13px; }
 .aw-preview-empty p { margin: 0; }
 
-.aw-send-panel { min-height: 0; overflow: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 12px; padding: 4px 4px 60px; }
-.aw-send-panel h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+/* One column beside the preview, split by hairlines: no card per group. */
+.aw-send-panel { min-height: 0; overflow: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 20px; padding: 12px 4px 60px 28px; border-left: 1px solid var(--cf-line); }
+.aw-send-panel .aw-card { padding: 0 0 20px; border-radius: 0; background: none; box-shadow: none; border-bottom: 1px solid var(--cf-line); }
+.aw-send-panel h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; font-weight: 500; letter-spacing: -0.005em; }
 .aw-flags, .aw-package { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
 .aw-flags h2 svg { color: var(--cf-done); }
 .aw-hold { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; color: var(--cf-text-2); }
 .aw-hold .cf-link-btn { margin-left: auto; }
-.aw-flag-group h3 { margin: 4px 0 2px; font: 11.5px var(--cf-mono); font-weight: 400; color: var(--cf-text-3); }
+.aw-flag-group h3 { margin: 4px 0 2px; font: 12.5px var(--cf-font); font-weight: 400; color: var(--cf-text-3); }
 .aw-flag-group ul, .aw-package ul { list-style: none; margin: 0; padding: 0; }
 .aw-flag-group li { display: flex; align-items: baseline; gap: 9px; padding: 6px 0; font-size: 13px; line-height: 1.45; }
 .aw-flag-group li .cf-dot { flex: none; transform: translateY(-1px); }
 .aw-flag-text { flex: 1; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.aw-times { flex: none; font: 11px var(--cf-mono); color: var(--cf-text-3); }
+.aw-times { flex: none; font: 11.5px var(--cf-font); font-variant-numeric: tabular-nums; color: var(--cf-text-3); }
 .aw-fix { flex: none; font-size: 12.5px; font-weight: 500; color: var(--cf-text); text-decoration: none; }
 @media (hover: hover) { .aw-fix:hover { text-decoration: underline; } }
 .aw-package li { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; }
@@ -303,7 +307,7 @@ button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offse
 .aw-missing-word { flex: none; font-size: 12px; color: var(--cf-blocking-ink); }
 .aw-send-panel .cf-submit { display: flex; flex-direction: column; gap: 8px; }
 .aw-send-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.aw-export-status { padding: 12px 14px; border-radius: 12px; background: rgba(17, 24, 39, 0.035); font-size: 13px; }
+.aw-export-status { padding: 12px 14px; border-radius: 8px; background: var(--cf-fill); font-size: 13px; }
 .aw-export-status p { margin: 0 0 4px; }
 .aw-more-details { font-size: 13px; color: var(--cf-text-2); }
 .aw-more-details summary { cursor: pointer; color: var(--cf-text-3); font-size: 12.5px; }
@@ -323,7 +327,7 @@ button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offse
 
 /* ---------- Empty ---------- */
 .aw-empty { max-width: 560px; margin: 96px auto; padding: 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
-.aw-empty h1 { margin: 0; font-size: 30px; font-weight: 600; letter-spacing: -0.03em; }
+.aw-empty h1 { margin: 0; font-size: 28px; font-weight: 400; letter-spacing: -0.015em; }
 
 /* ---------- Narrow ---------- */
 @media (max-width: 1100px) {
@@ -342,7 +346,7 @@ button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offse
   .aw-send { display: flex; flex-direction: column; overflow: auto; padding: 0 12px; }
   .aw-package-preview { order: 2; flex: none; min-height: 0; }
   .aw-package-pages { flex: none; overflow: visible; }
-  .aw-send-panel { order: 1; flex: none; min-height: auto; overflow: visible; padding-bottom: 12px; }
+  .aw-send-panel { order: 1; flex: none; min-height: auto; overflow: visible; padding: 4px 0 12px; border-left: 0; }
   .aw-bar { padding: 10px 12px; gap: 8px; }
   .aw-zoom { display: none; }
 }

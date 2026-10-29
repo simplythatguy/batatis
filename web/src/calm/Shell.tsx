@@ -95,6 +95,8 @@ export function SaveStatus() {
   const saveConflict = useLasting(conflicted, 1500) || (saveConflictReview?.kind ?? "closed") !== "closed";
   // A submission on its way keeps the saved state; the page says editing is paused.
   const current = useCurrentApplication();
+  // Unsaved changes that autosave has not picked up after a few seconds offer Save now.
+  const stuck = useLasting(saveStatus === "unsaved", 4000);
   if (phase !== "case") return null;
   if (current.readOnly) {
     const s = readOnlyStatus(current.app?.status);
@@ -112,6 +114,12 @@ export function SaveStatus() {
   const problem = saveStatus === "failed" || saveStatus === "gone";
   const label = saveConflict ? "Saved changes need review" : s.label;
   const detail = saveDetail && saveDetail !== label ? saveDetail : "";
+  // Saving is quiet (user decision 2026-10-29): a small grey spinner while work is on its way, nothing once
+  // it is saved. Only a problem the person must act on keeps its words.
+  if (!problem && !saveConflict && !stuck) {
+    const busy = saveStatus === "saving" || saveStatus === "unsaved";
+    return <><div className="cf-save is-quiet" role="status">{busy && <span className="cf-spinner" aria-hidden="true" />}<span className="cf-sr">{s.label}</span></div><SaveConflictDialog /></>;
+  }
   return (
     <><div className={`cf-save${problem || saveConflict ? " is-problem" : ""}`} role="status" title={[savedNote, saveDetail].filter(Boolean).join(" · ") || undefined}>
       <Dot tone={s.tone} />

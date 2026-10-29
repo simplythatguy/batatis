@@ -1,29 +1,38 @@
 /* Current calm system; shared.css supplies embedded controls, quotes and notices. */
 
 :root {
-  /* Light layer (user decision 2026-10-22): soft grey canvas, white surfaces, dark ink, hairlines.
-     Colour carries meaning: the accent for the brand, one hue per section, status dots. */
-  --cf-bg: #f5f6f8;
-  --cf-rail: #eceef2;
+  /* Mercury-style layer (user decision 2026-10-29): a white page, a barely tinted sidebar, white
+     surfaces with hairline edges and no drop shadows, warm neutral ink, one indigo primary.
+     Colour still carries meaning: the brand mark, one hue per section, status dots. */
+  --cf-bg: #ffffff;
+  --cf-rail: #fbfcfe;
+  --cf-side: #fbfcfe;
   --cf-raise: #ffffff;
   --cf-surface: #ffffff;
-  --cf-text: #14161b;
-  --cf-text-2: #4a505c;
-  --cf-text-3: #6b7280;
-  --cf-text-4: #a3a8b3;
-  /* One line set for every divider, chip, card and button (soft), a stronger one for state
+  --cf-text: #121217;
+  --cf-text-2: #4f4e54;
+  --cf-text-3: #6b6a70;
+  --cf-text-4: #8a898e;
+  /* One line set for every divider, card and table row (soft), a stronger one for state
      (pressed, hover borders), and the form-control boundary (3:1 on white) only on inputs. */
-  --cf-line: rgba(17, 24, 39, 0.08);
-  --cf-line-2: rgba(17, 24, 39, 0.14);
-  --cf-line-ctl: rgba(17, 24, 39, 0.42);
-  --cf-hover: rgba(17, 24, 39, 0.04);
-  --cf-selected: rgba(17, 24, 39, 0.07);
+  --cf-line: #ebebee;
+  --cf-line-2: #e0e0e5;
+  --cf-line-ctl: rgba(18, 18, 23, 0.42);
+  --cf-hover: #f7f7f9;
+  --cf-selected: #edeef2;
+  --cf-fill: #f0f1f5;
+  --cf-fill-hover: #e6e7ee;
+  --cf-field: #fbfcfe;
   --cf-glass: #ffffff;
   --cf-glass-hi: transparent;
   --cf-inset: #ffffff;
-  --cf-shadow: 0 1px 2px rgba(17, 24, 39, 0.05), 0 4px 16px -6px rgba(17, 24, 39, 0.08);
-  --cf-accent: #f25a2a;
-  --cf-accent-ink: #c2410c;
+  --cf-shadow: 0 1px 3px rgba(18, 18, 23, 0.04);
+  --cf-shadow-pop: 0 4px 12px rgba(18, 18, 23, 0.08), 0 1px 2px rgba(18, 18, 23, 0.04);
+  --cf-scrim: rgba(30, 30, 82, 0.15);
+  --cf-toast: #1e1e2a;
+  /* Brand: the mark and "new" markers share the primary indigo (user decision 2026-10-29). */
+  --cf-accent: #5266eb;
+  --cf-accent-ink: #3f51c9;
   /* Readable text in a status colour on the light page (each at least 4.5:1 on white and on its tint). */
   --cf-warning-ink: #8a5300;
   --cf-blocking-ink: #b42318;
@@ -47,16 +56,18 @@
   --cf-hue-green-t: #e4f5ea;
   --cf-hue-slate: #64748b;
   --cf-hue-slate-t: #eef1f5;
-  --cf-primary-bg: #16181d;
-  --cf-primary-hover: #2b2f37;
+  /* The one primary action per screen: indigo, white text (4.7:1); disabled is a pale indigo. */
+  --cf-primary-bg: #5266eb;
+  --cf-primary-hover: #4356d6;
+  --cf-primary-off: #bcc4f9;
   --cf-primary-text: #ffffff;
-  --cf-focus: #6b7280;
+  --cf-focus: #5266eb;
   --cf-font: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
   --cf-mono: "Geist Mono Variable", ui-monospace, "SF Mono", monospace;
   --cf-ease: cubic-bezier(0.2, 0, 0, 1);
-  --cf-r-card: 16px;
-  --cf-r-tile: 12px;
-  --cf-r-ctl: 10px;
+  --cf-r-card: 12px;
+  --cf-r-tile: 10px;
+  --cf-r-ctl: 8px;
   --cf-sheet: #fff;
   --cf-sheet-text: #111;
   --cf-sheet-muted: #63636b;
@@ -73,7 +84,7 @@
 .is-rose { --hue: var(--cf-hue-rose); --hue-t: var(--cf-hue-rose-t); --hue-s: #b4235a; }
 .is-green { --hue: var(--cf-hue-green); --hue-t: var(--cf-hue-green-t); --hue-s: #11713f; }
 .is-slate { --hue: var(--cf-hue-slate); --hue-t: var(--cf-hue-slate-t); --hue-s: #3f4b5e; }
-.is-accent { --hue: var(--cf-accent); --hue-t: #fdeae3; }
+.is-accent { --hue: var(--cf-accent); --hue-t: #eeeefc; }
 
 
 html,
@@ -138,7 +149,7 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 8px 12px 9px 13px;
-  background: radial-gradient(circle at 35% 30%, #ffa27a, var(--cf-accent) 55%, #c63f12);
+  background: radial-gradient(circle at 35% 30%, #9aa6ff, var(--cf-accent) 55%, #3a49b8);
 }
 
 .cf-rail-btn {
@@ -897,18 +908,9 @@ body {
   display: inline-flex;
 }
 
-.cf-stage-done {
-  position: absolute;
-  top: -5px;
-  right: -6px;
-  display: grid;
-  place-items: center;
-  width: 11px;
-  height: 11px;
-  border-radius: 999px;
-  background: var(--cf-done);
-  color: #fff;
-  box-shadow: 0 0 0 1.5px var(--cf-bg);
+/* A finished stage steps back: its icon fades further than the ones still ahead (user decision 2026-10-29). */
+.cf-stage.is-done:not([aria-current="step"]) {
+  --stage-o: 0.32;
 }
 
 /* The current stage's name, one word beside its icon. Every stage renders it; only the current one's
@@ -942,11 +944,6 @@ body {
   transition-property: translate;
   transition-duration: 240ms;
   transition-timing-function: var(--cf-ease);
-}
-
-/* Clear of the done mark, which sits over the icon's top-right corner. */
-.cf-stage.is-done .cf-stage-word-clip > span {
-  padding-left: 9px;
 }
 
 .cf-stage[aria-current="step"] .cf-stage-word {
@@ -1777,7 +1774,7 @@ body {
   }
 }
 
-/* Neutral focus rings everywhere in the calm shell. */
+/* One focus ring (the indigo focus token) everywhere in the calm shell. */
 .cf-app :is(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--cf-focus);
   outline-offset: 2px;
@@ -1816,6 +1813,32 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .cf-pulse {
     animation: cf-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+/* The save spinner: grey, small, and only after a moment, so quick saves never flash. */
+.cf-save.is-quiet {
+  min-width: 14px;
+}
+
+.cf-spinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--cf-line-2);
+  border-top-color: var(--cf-text-3);
+  border-radius: 50%;
+  animation: cf-spin 800ms linear infinite, cf-fade-in 200ms ease-out 300ms both;
+}
+
+@keyframes cf-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-spinner {
+    animation: cf-fade-in 200ms ease-out 300ms both;
   }
 }
 
@@ -3984,20 +4007,16 @@ body {
   }
 }
 
+/* One row, edge to edge: the three band toggles, the scoring action and the legend, evenly spaced. */
 .cf-lib-tools {
   flex: none;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 12px 10px;
-  border-bottom: 1px solid var(--cf-line);
-}
-
-.cf-filters {
-  display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 6px 4px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--cf-line);
 }
 
 .cf-chip.is-sm {
@@ -4007,26 +4026,56 @@ body {
   font-size: 12.5px;
 }
 
-.cf-lib-score {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
+.cf-band-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 40px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--cf-line-2);
+  border-radius: 999px;
+  background: var(--cf-surface);
+  color: var(--cf-text-2);
+  font: 500 12.5px/1 var(--cf-font);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition-property: background-color, border-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
 
-.cf-lib-score .cf-legend-btn {
+.cf-band-toggle[aria-pressed="true"] {
+  border-color: transparent;
+  background: #eeeefc;
+  color: var(--cf-text);
+}
+
+.cf-band-toggle:not(:disabled):active {
+  scale: 0.96;
+}
+
+.cf-band-toggle:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+@media (hover: hover) {
+  .cf-band-toggle:not(:disabled):not([aria-pressed="true"]):hover {
+    background: var(--cf-hover);
+  }
+}
+
+.cf-lib-tools .cf-legend-btn {
   flex: none;
-  margin-top: 1px;
 }
 
 .cf-score-wrap {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 10px;
-  padding-left: 2px;
 }
 
 .cf-score {
@@ -4042,6 +4091,10 @@ body {
 .cf-score .cf-btn {
   height: 26px;
   margin-left: 4px;
+}
+
+.cf-score .cf-btn:first-child {
+  margin-left: 0;
 }
 
 .cf-score-why {

@@ -6,6 +6,7 @@ import "@fontsource-variable/geist-mono";
 import "../../docs/design/tokens.css";
 import "./shared.css";
 import "./calm/calm.css";
+import "./calm/mercury.css";
 import { App } from "./App";
 import { CaseProvider } from "./store";
 

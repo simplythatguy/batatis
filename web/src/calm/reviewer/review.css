@@ -17,7 +17,7 @@
 .pr-meta-foot .pr-faint { margin: 0; }
 
 .pr-body { padding: 26px 0 8px; outline: none; min-width: 0; }
-.pr-title { margin: 0 0 8px; font-size: 26px; line-height: 1.22; font-weight: 500; letter-spacing: -0.02em; text-wrap: balance; }
+.pr-title { margin: 0 0 8px; font-size: 26px; line-height: 1.22; font-weight: 400; letter-spacing: -0.015em; text-wrap: balance; }
 .pr-lede { margin: 0 0 18px; color: var(--cf-text-2); font-size: 14.5px; line-height: 1.55; max-width: 62ch; }
 .pr-fine { margin: 18px 0 0; color: var(--cf-text-3); font-size: 12.5px; line-height: 1.5; }
 .pr-admin { margin: 6px 0 0; }
@@ -28,7 +28,7 @@
 .pr-group { margin-top: 22px; }
 .pr-group-h { display: block; margin: 0 0 4px; font-size: 13px; font-weight: 500; color: var(--cf-text-3); }
 .pr-group-sub { margin: 0 0 4px; font-size: 13px; line-height: 1.5; }
-.pr-n { font: 500 11.5px var(--cf-mono); color: var(--cf-text-4); padding-left: 4px; }
+.pr-n { font: 500 12px var(--cf-font); font-variant-numeric: tabular-nums; color: var(--cf-text-4); padding-left: 4px; }
 .pr-label { margin-top: 16px; }
 
 .pr-list { list-style: none; margin: 0; padding: 0; }
@@ -85,7 +85,7 @@
 .pr-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 22px; border-top: 1px solid var(--cf-line); border-bottom: 1px solid var(--cf-line); }
 .pr-metrics > div { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 14px 0; }
 .pr-metrics > div + div { padding-left: 16px; border-left: 1px solid var(--cf-line); }
-.pr-metrics b { font-size: 26px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.pr-metrics b { font-size: 26px; font-weight: 400; letter-spacing: -0.015em; font-variant-numeric: tabular-nums; }
 .pr-metrics span { color: var(--cf-text-3); font-size: 12.5px; line-height: 1.4; }
 
 /* Diff */
@@ -251,7 +251,7 @@
 .pr-metrics { border: 0; gap: 10px; margin: 20px 0 0; }
 .pr-metrics > div, .pr-metrics > div + div { position: relative; padding: 14px 16px; border: 0; border-radius: var(--cf-r-tile); background: var(--cf-hover); }
 .pr-metrics > div > svg { color: var(--cf-text-2); }
-.pr-metrics b { color: var(--cf-text-2); font-size: 30px; font-weight: 600; line-height: 1.1; margin-top: 6px; }
+.pr-metrics b { color: var(--cf-text-2); font-size: 30px; font-weight: 400; line-height: 1.1; margin-top: 6px; }
 .pr-metrics span { color: var(--cf-text-2); font-size: 13px; }
 .pr-quote figcaption { margin: 0 0 6px; }
 .pr-quote blockquote { border-left-color: var(--cf-line-2); }

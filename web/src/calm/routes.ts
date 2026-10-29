@@ -4,6 +4,8 @@
  * so every "Fix" or "Answer" link lands on the matching question card.
  */
 
+import { filterBands } from "./relevance";
+
 export type Screen = "start" | "questions" | "review" | "application" | "code" | "comments";
 
 export type WorkspaceStep = "edit" | "sign" | "send";
@@ -19,7 +21,8 @@ export interface CalmRoute {
   download: "" | "options" | "draft";
   /** Code library: the open article (`#/code/<id>`) and the relevance filter. */
   article: string | null;
-  filter: "" | "all" | "attention" | "maybe";
+  /** "", "all", or a comma list of band toggles (see FILTER_BANDS in relevance.ts). */
+  filter: string;
   /** The calm hash for this route. Differs from the current hash when it was a legacy link. */
   canonical: string;
 }
@@ -64,7 +67,9 @@ export function codeHref(articleId?: string | null, filter?: CalmRoute["filter"]
   return build("code", null, { article: articleId ?? null, filter: filter ?? "" }).canonical;
 }
 
-const FILTERS = new Set(["all", "attention", "maybe"]);
+function parseFilter(f: string): string {
+  return f === "all" ? "all" : [...filterBands(f)].join(",");
+}
 
 export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
   const focus = deckFocus(params.get("focus"));
@@ -76,7 +81,7 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
       article = null;
     }
     const f = params.get("filter") ?? "";
-    return build("code", null, { article, filter: FILTERS.has(f) ? (f as CalmRoute["filter"]) : "" });
+    return build("code", null, { article, filter: parseFilter(f) });
   }
   switch (path) {
     case "":

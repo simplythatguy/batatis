@@ -65,20 +65,20 @@
 
 .ac-in {
   width: 100%;
-  height: 46px;
-  padding: 0 14px;
+  height: 40px;
+  padding: 0 12px;
   border-radius: var(--cf-r-ctl);
   border: 1px solid var(--cf-line-2);
-  background: transparent;
+  background: var(--cf-field);
   color: var(--cf-text);
-  font: 400 15px var(--cf-font);
+  font: 400 14.5px var(--cf-font);
   outline: none;
   appearance: none;
-  transition-property: border-color;
+  transition-property: border-color, background-color, box-shadow;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
-.ac-in:focus { border-color: var(--cf-focus); }
+.ac-in:focus { border-color: var(--cf-focus); background: var(--cf-surface); box-shadow: 0 0 0 3px rgba(82, 102, 235, 0.14); }
 .ac-row-value .ac-in { width: 160px; height: 34px; font-size: 14px; }
 .ac-row-value .ac-in.ac-in-short { width: 96px; }
 .ac-code { font: 500 13px var(--cf-mono, ui-monospace, monospace); user-select: all; overflow-wrap: anywhere; }
@@ -112,8 +112,8 @@
   height: 28px;
 }
 .ac-auth-title { margin: 16px 0 22px; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.2; color: var(--cf-text-2); }
-.ac-auth-go { height: 46px; margin-top: 6px; }
-.ac-oauth { height: 46px; margin-bottom: 10px; }
+.ac-auth-go { height: 40px; margin-top: 6px; }
+.ac-oauth { height: 40px; margin-bottom: 10px; }
 .ac-or {
   display: flex;
   align-items: center;
@@ -151,7 +151,7 @@
 @keyframes ac-fade { from { opacity: 0; } }
 
 .ac-q-num { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--cf-accent-ink); font-size: 15px; font-weight: 550; }
-.ac-q-text { margin: 0; font-size: 34px; line-height: 1.22; letter-spacing: -0.022em; font-weight: 500; }
+.ac-q-text { margin: 0; font-size: 28px; line-height: 1.25; letter-spacing: -0.015em; font-weight: 400; }
 .ac-q-help { margin: 14px 0 0; color: var(--cf-text-2); font-size: 17px; line-height: 1.55; }
 
 .ac-choices { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; width: min(420px, 100%); }
@@ -335,7 +335,7 @@
 .ac-page-body { flex: 1; padding: 28px 32px 40px; }
 /* Settings, notifications: one centred 640px column with the onboarding screens' rhythm. */
 .ac-page-body.is-narrow { width: 100%; max-width: 704px; margin: 0 auto; padding-top: 56px; }
-.ac-page-title { margin: 0 0 28px; font-size: 34px; line-height: 1.22; letter-spacing: -0.022em; font-weight: 500; }
+.ac-page-title { margin: 0 0 28px; font-size: 28px; line-height: 1.25; letter-spacing: -0.015em; font-weight: 400; }
 
 /* Settings */
 
@@ -393,7 +393,7 @@
 .ac-search-kbd { font: 500 11px var(--cf-mono); color: var(--cf-text-3); }
 
 .ac-queue-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; }
-.ac-h1 { margin: 0; font-size: 28px; font-weight: 550; letter-spacing: -0.025em; line-height: 1.15; }
+.ac-h1 { margin: 0; font-size: 28px; font-weight: 400; letter-spacing: -0.015em; line-height: 1.15; }
 .ac-lead { margin: 6px 0 0; color: var(--cf-text-2); font-size: 14.5px; line-height: 1.55; }
 .ac-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 .ac-tab {
@@ -413,7 +413,7 @@
 }
 .ac-tab[aria-pressed="true"] { background: var(--cf-selected); color: var(--cf-text); }
 @media (hover: hover) { .ac-tab:not([aria-pressed="true"]):hover { color: var(--cf-text); } }
-.ac-tab-n { font: 500 11.5px var(--cf-mono); color: var(--cf-text-3); }
+.ac-tab-n { font: 500 12px var(--cf-font); font-variant-numeric: tabular-nums; color: var(--cf-text-3); }
 .ac-empty { margin: 24px 0; color: var(--cf-text-3); font-size: 14.5px; }
 
 .ac-pill {
@@ -480,7 +480,7 @@
   transition-property: background-color, border-color, color;
   transition-duration: 150ms;
 }
-.ac-check input:checked + .ac-box { background: var(--cf-text); border-color: var(--cf-text); color: var(--cf-primary-text); }
+.ac-check input:checked + .ac-box { background: var(--cf-primary-bg); border-color: var(--cf-primary-bg); color: var(--cf-primary-text); }
 .ac-check input:focus-visible + .ac-box { outline: 2px solid var(--cf-focus); outline-offset: 2px; }
 .ac-check input:checked ~ .ac-check-text { color: var(--cf-text); }
 .ac-check-text { display: flex; align-items: baseline; gap: 8px; }

@@ -13,7 +13,7 @@
 .cf-journey-step.is-on .cf-journey-step-word { grid-template-columns: 1fr; opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .cf-journey-step-word { transition: none; } }
 .cf-journey-counts, .cf-journey-counts > span, .cf-journey-map-toggle { display: inline-flex; align-items: center; gap: 6px; }
-.cf-journey-counts { gap: 14px; font: 12px var(--cf-mono); color: var(--cf-text-2); }
+.cf-journey-counts { gap: 14px; font: 12.5px var(--cf-font); font-variant-numeric: tabular-nums; color: var(--cf-text-2); }
 .cf-journey-map-toggle { font-size: 13px; color: var(--cf-text-2); }
 .cf-journey-map-toggle svg { transition: transform 200ms var(--cf-ease); }
 .cf-journey-map-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
@@ -65,14 +65,15 @@
   .cf-understood-sources { grid-column: 2; justify-content: flex-start; }
   .cf-understood-fix { grid-column: 3; grid-row: 1; }
 }
-.cf-source-chip { border: 1px solid var(--cf-line-2); border-radius: 5px; padding: 2px 5px; font-size: 11px; color: var(--cf-text-3); }
-.cf-source-chip.is-assumed { border-style: dashed; }
+.cf-source-chip { font-size: 12px; color: var(--cf-text-3); }
+.cf-source-chip + .cf-source-chip::before { content: "·" / ""; margin-right: 5px; }
+.cf-source-chip.is-assumed { text-decoration: underline dashed var(--cf-text-4); text-underline-offset: 3px; }
 .cf-understood-fix { color: var(--cf-text-3); font-size: 12px; text-align: right; }
 .cf-answerer-tag { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--cf-text-3); font-size: 12px; }
 .cf-q-stage.is-paperwork { align-items: flex-start; padding-top: 32px; }
 .cf-paperwork { margin-top: 28px; max-width: 640px; }
 .cf-pw-group + .cf-pw-group { margin-top: 22px; }
-.cf-pw-group-h { margin: 0 0 4px; font: 500 12px/1.4 var(--cf-mono); color: var(--cf-text-3); }
+.cf-pw-group-h { margin: 0 0 4px; font: 400 12.5px/1.4 var(--cf-font); color: var(--cf-text-3); }
 .cf-pw-row { display: grid; grid-template-columns: 136px minmax(0, 1fr) 44px; gap: 14px; align-items: start; padding: 6px 0; }
 .cf-pw-label { padding-top: 9px; font-size: 13px; color: var(--cf-text-3); }
 .cf-pw-value { min-width: 0; }
