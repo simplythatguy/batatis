@@ -8,6 +8,11 @@ from engine.models import Case, Fact, Source
 from engine.store import CaseStore
 
 
+def ledger_b(result):
+    """Division B rules in the requirement ledger. A requirement run stores no article cards (compact.py)."""
+    return [r['provision_id'] for r in result['requirements'] if r['division'] == 'B']
+
+
 def input_fact(field, value):
     return Fact(field=field, value=value, kind='pointed', status='confirmed',
                 source=Source(type='user_text', ref='applicant'))
@@ -35,8 +40,8 @@ def test_exact_reference_identification_is_local_and_has_no_hidden_top_ten(scene
     response = client.post(f'/cases/{case.id}/identify', json={})
     assert response.status_code == 200, response.text
     result = response.json()
-    assert any(item['provision'] == '9.10.15.5.' for item in result['articles'])
-    assert result['articles'][0]['provision'] == '9.10.15.5.'
+    assert result['articles'] == []
+    assert ledger_b(result)[0] == '9.10.15.5.'
     assert result['input_sha256'] and not result['stale']
     assert sum(stage['requests'] for stage in result['trace']['stages']) == 0
     assert result['trace']['usd'] == 0
@@ -63,7 +68,7 @@ def test_readable_plans_alone_run_identification_during_intake(scene):
     assert response.status_code == 200, response.text
     result = client.get(f'/cases/{case.id}/identify').json()
     assert result['input_sha256'] and not result['stale']
-    assert any(item['provision'] == '9.10.15.5.' for item in result['articles'])
+    assert '9.10.15.5.' in ledger_b(result)
 
 
 def test_new_attachment_marks_previous_result_stale_without_a_fact_write(scene):
@@ -80,7 +85,7 @@ def test_identify_accepts_long_prose_without_a_provider(scene):
     case = store.put(Case())
     response = client.post(f'/cases/{case.id}/identify', json={'prose': ('description ' * 2500) + '9.10.15.5.'})
     assert response.status_code == 200, response.text
-    assert any(item['provision'] == '9.10.15.5.' for item in response.json()['articles'])
+    assert '9.10.15.5.' in ledger_b(response.json())
 
 
 def test_supporting_application_scope_survives_no_departure_and_a_rerun(scene):
@@ -216,3 +221,76 @@ def test_rule_card_answer_after_a_changed_fact_reruns_the_local_check_first(scen
     assert not result['stale']
     kept = next(r for r in result['requirements'] if r['id'] == requirement['id'])
     assert kept['human_confirmed'] and kept['disposition'] == 'include'
+
+
+CARD_GAPS = {'section_c.article', 'section_c.intent', 'provisions'}
+
+
+def _blocking_card_gaps(client, case_id):
+    items = client.get(f'/cases/{case_id}/gaps').json()['items']
+    return [g for g in items if g['severity'] == 'blocking' and g.get('submission_blocking', True)
+            and (g['field'] in CARD_GAPS or g['field'].startswith(('identify.', 'section_c.')))]
+
+
+def test_demo_rule_cards_save_and_section_c_lists_the_differing_sentence(scene):
+    """The deck's demo path over HTTP: "Yes, it applies" on "Openings in Exposing Building Face", then the
+    follow-up card ("Does your design do something different…") for the sentence the rule was quoted by,
+    then the one-line departure. Every answer saves, the cards leave no submission-blocking gap, and
+    Section C lists that sentence (not the bare article or all eleven of its sentences)."""
+    client, store = scene
+    case = store.put(Case())
+    assert client.post(f'/cases/{case.id}/intake', json={'text': DEMO_TEXT, 'model': False}).status_code == 200
+    case = store.get(case.id)
+    looks_right = [Fact(field=f.field, value=f.value, kind='pointed', status='confirmed',
+                        source=Source(type='user_click', ref='Confirmed by applicant', quote=str(f.value)))
+                   for f in case.facts if f.field != 'project.description']
+    version = _patch_facts(client, case, looks_right)
+    assert {g['field'] for g in _blocking_card_gaps(client, case.id)} >= {'provisions'}
+
+    ledger = client.get(f'/cases/{case.id}/identify').json()
+    rule = next(r for r in ledger['requirements'] if r['division'] == 'B' and r['provision_id'] == '9.10.14.4.')
+    assert rule['title'] == 'Openings in Exposing Building Face'
+    applies = client.post(f'/cases/{case.id}/identify/requirements/{rule["id"]}/decision', json={
+        'disposition': 'include', 'role': 'conditional',
+        'reason': 'The applicant confirmed this rule applies to this project.', 'expected_version': version})
+    assert applies.status_code == 200, applies.text
+    confirmed = next(r for r in applies.json()['requirements'] if r['id'] == rule['id'])
+    # The follow-up card is about the sentence the rule was quoted by.
+    sentence = confirmed['quote_provision_id']
+    assert sentence == '9.10.14.4.(1)'
+
+    differs = client.post(f'/cases/{case.id}/identify/{sentence}/decision', json={
+        'decision': 'yes', 'expected_version': applies.json()['case_version']})
+    assert differs.status_code == 200, differs.text
+    assert [row['provision_id'] for row in differs.json()['section_c']] == [sentence]
+    departure = client.post(f'/cases/{case.id}/identify/benchmark', json={
+        'provision': sentence, 'departure': 'We propose a fire-rated window assembly and a fire-rated exterior wall.',
+        'expected_version': differs.json()['case_version']})
+    assert departure.status_code == 200, departure.text
+
+    saved = store.get(case.id)
+    assert saved.provisions == [sentence]
+    assert [row.provision_id for row in saved.section_c] == [sentence]
+    assert _blocking_card_gaps(client, case.id) == []
+
+    # The answer can be changed: "No, it follows" takes the sentence back out of Section C.
+    follows = client.post(f'/cases/{case.id}/identify/{sentence}/decision', json={
+        'decision': 'no', 'expected_version': store.get(case.id).version})
+    assert follows.status_code == 200, follows.text
+    assert store.get(case.id).provisions == [] and store.get(case.id).section_c == []
+
+
+def test_no_on_one_sentence_keeps_the_other_sentence_of_the_rule(scene):
+    """Cards split from one rule decide their own sentence: a No on one never wipes another's Section C row."""
+    client, store = scene
+    case = store.put(Case(facts=[input_fact('project.description', '9.10.14.4.')]))
+    assert client.post(f'/cases/{case.id}/identify', json={}).status_code == 200
+    for sentence in ('9.10.14.4.(1)', '9.10.14.4.(2)'):
+        response = client.post(f'/cases/{case.id}/identify/{sentence}/decision', json={'decision': 'yes'})
+        assert response.status_code == 200, response.text
+    assert store.get(case.id).provisions == ['9.10.14.4.(1)', '9.10.14.4.(2)']
+    assert client.post(f'/cases/{case.id}/identify/9.10.14.4.(2)/decision', json={'decision': 'no'}).status_code == 200
+    saved = store.get(case.id)
+    assert saved.provisions == ['9.10.14.4.(1)']
+    assert [row.provision_id for row in saved.section_c] == ['9.10.14.4.(1)']
+    assert any(f.field == 'citation.9.10.14.4.' for f in saved.facts)

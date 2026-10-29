@@ -36,10 +36,16 @@ def stable_id(case_id: str, kind: str, article: str) -> str:
     return f'{kind}_' + hashlib.sha256(f'{case_id}:{kind}:{article}'.encode()).hexdigest()[:12]
 
 
-def match_article(result: IdentifyResult, provision_id: str):
+def match_article(result: IdentifyResult, provision_id: str) -> str:
+    """The article a decision on `provision_id` is about: an identified article card, or a verified
+    Division B rule in the requirement ledger (a requirement run keeps no article cards)."""
     wanted = provision_id or ''
-    for article in result.articles:
-        if wanted in {article.provision, article.provision_id} or article.provision == article_of(wanted):
+    article = article_of(wanted)
+    for card in result.articles:
+        if wanted in {card.provision, card.provision_id} or card.provision == article:
+            return card.provision
+    for item in result.requirements:
+        if item.division == 'B' and item.source_status == 'verified' and item.provision_id == article:
             return article
     raise KeyError(provision_id)
 
@@ -89,13 +95,19 @@ def record_decision(case, provision_id: str, decision: str, codes) -> list:
     if decision not in DECISIONS:
         raise ValueError(decision)
     result: IdentifyResult = case.identify
-    card = match_article(result, provision_id)
-    article = card.provision
+    article = match_article(result, provision_id)
+    # A card on one sentence decides that sentence, as the benchmark route does: Section C lists what differs.
+    named = provision_id if article_of(provision_id) == article else article
     if decision == 'yes':
-        return record_departure(case, article, codes)
-    case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']
-    case.provisions = [p for p in case.provisions if article_of(p) != article]   # the article and its sentences
+        return record_departure(case, named, codes)
+    if named == article:
+        case.provisions = [p for p in case.provisions if article_of(p) != article]   # the article and its sentences
+    else:
+        case.provisions = [p for p in case.provisions if p not in (article, named)]
     case.section_c = section_c_rows(case.provisions, codes) if case.provisions else []
+    if any(article_of(p) == article for p in case.provisions):
+        return []   # another sentence of this rule still differs, so its citation and Yes stand
+    case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']
     result.decisions[article] = ArticleDecision(
         decision=decision, decided_at=now(),
         open_question_id=stable_id(case.id, 'oq', article) if decision == 'not_sure' else None)
@@ -112,7 +124,8 @@ def information_request(case) -> dict:
     for article, chosen in (result.decisions.items() if result else []):
         if chosen.decision != 'not_sure':
             continue
-        title = next((a.title for a in result.articles if a.provision == article), None)
+        title = next((a.title for a in result.articles if a.provision == article), None) or next(
+            (r.title for r in result.requirements if r.division == 'B' and r.provision_id == article), None)
         items.append({'id': chosen.open_question_id, 'provision_id': article, 'text': question_text(article, title)})
     return {'case_id': case.id, 'items': items}
 
