@@ -23,7 +23,7 @@ import unicodedata
 from pathlib import Path
 
 from ..models_jurisdictions import PlacesFile
-from . import DATA_DIR
+from . import DATA_DIR, _key as fold
 
 ROOT = DATA_DIR.parents[2]
 RESEARCH = ROOT / 'docs' / 'research' / '2026-10-28-every-jurisdiction'
@@ -223,12 +223,6 @@ def add_community_aliases(hand: dict, alberta: list[dict]) -> None:
     by_name = {p['name']: p for p in alberta}
     for alias, name in hand['community_aliases']['aliases'].items():
         by_name[name]['aliases'] = [*by_name[name]['aliases'], alias]
-
-
-def fold(name: str) -> str:
-    """Case-, accent- and apostrophe-free, so 'Kikino Métis Settlement' matches 'Kikino Metis Settlement'."""
-    text = unicodedata.normalize('NFKD', name.replace('\u2019', "'").replace('\u2018', "'")).encode('ascii', 'ignore').decode()
-    return ' '.join(text.split()).casefold()
 
 
 def dedupe_aliases(places: list[dict]) -> list[str]:

@@ -167,6 +167,7 @@ EVERYDAY = [
     ('Sherwood Park', 'accredited_municipality', True, 'Strathcona County'),
     ('Cold Lake', 'accredited_municipality', True, 'City of Cold Lake'),           # not Cold Lake First Nations
     ('Lake Louise', 'federal', False, 'Parks Canada'),
+    ('St. Johns', 'outside_alberta', False, "City of St. John's"),                 # a period and no apostrophe
 ]
 
 
@@ -206,6 +207,24 @@ def test_local_items_never_leak_to_another_place():
             continue
         assert local == [] and export_notice(case) is None, place_id
         assert pack.standing_packages == [] and pack.guides == [] and pack.forms == [], place_id
+
+
+# Where the Safety Codes Act does not decide, or Batatis has not confirmed who does (written out, not read from the code).
+NOT_UNDER_THE_ACT = {'first_nation', 'federal', 'outside_alberta', 'unconfirmed'}
+
+
+def test_alberta_process_items_reach_only_places_under_the_act():
+    reg = registry()
+    shared = reg.provinces['AB']
+    everything = ([n.id for n in shared.process_notes], [f.id for f in shared.forms], shared.bulletins)
+    for pack in reg.packs.values():
+        detail = reg.detail(pack)
+        province = ([n.id for n in detail.process_notes if n.scope == 'province'],
+                    [f.id for f in detail.forms if f.scope == 'province'], [b for b in detail.bulletins if b in shared.bulletins])
+        if pack.authority.kind in NOT_UNDER_THE_ACT:
+            assert province == ([], [], []), pack.id
+        elif pack.province == 'AB':
+            assert province == everything, pack.id
 
 
 def test_identification_reads_the_same_text_whatever_the_place():

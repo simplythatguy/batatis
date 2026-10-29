@@ -11,6 +11,7 @@ for (const [place, pack, reviewer, shown] of [
   ["Calgary", "calgary", "calgary", "Calgary"], ["Edmonton", "edmonton", "edmonton", "Edmonton"],
   ["Red Deer", "red-deer", null, "Red Deer"], ["City of Red Deer", "red-deer", null, "Red Deer"],
   ["Lacombe County", "lacombe-county", null, "Lacombe County"], ["Vancouver", "vancouver", null, "Vancouver"],
+  ["St. Johns", "st-johns", null, "St. John's"],
   ["Example Hamlet", "alberta-other", null, "Example Hamlet"],
 ] as const) {
   test(`${place} resolves without inventing a reviewing account`, () => {

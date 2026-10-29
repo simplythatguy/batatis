@@ -12,7 +12,7 @@ determination; the safety codes officer decides.
 | Path | Model (`engine/models_jurisdictions.py`) | What it holds |
 |---|---|---|
 | `engine/data/jurisdictions/packs/<id>.json` | `JurisdictionPack` | One office. The file name is the pack id. |
-| `engine/data/jurisdictions/provinces/<XX>.json` | `ProvinceShared` | Items every pack in the province shares: the SCC variance form, SCC information bulletins, province-wide process notes. |
+| `engine/data/jurisdictions/provinces/<XX>.json` | `ProvinceShared` | Items every pack in the province shares where its Act applies: the SCC variance form, SCC information bulletins, province-wide process notes. A `first_nation`, `federal`, `outside_alberta` or `unconfirmed` pack gets none of them. |
 | `engine/data/jurisdictions/coverage.json` | `CoverageFile` | Coverage label for every province and territory, the label meanings, and `default_province`. |
 | `engine/data/jurisdictions/places/<group>.json` | `PlacesFile` | Generated places: `alberta.json` (390 rows of the research table plus Maskwacis and Stoney Nakoda) and `outside-alberta.json` (12 provinces and territories, 31 cities). Each place names the office that reviews building work there, with sources. |
 | `engine/data/jurisdictions/place_inputs.json` | input | Hand-entered facts the generator adds: park and airport names, places outside Alberta with their code and source, everyday names (First Nations, Fort McMurray, Sherwood Park). |
@@ -69,7 +69,7 @@ A case resolves to a pack in this order (`Registry.resolve`):
 1. `jurisdiction.id` equals a pack id or one of its `match.ids` → `matched_by: id`.
 2. `jurisdiction.name` or `jurisdiction.authority` equals the pack name or one of its `match.names` → `name`.
    Then the same for the part before a comma ("Toronto, ON", "Red Deer, AB") → `name`.
-   Comparisons ignore case, accents, curly apostrophes and spacing. A generated place pack's `match.names` are the
+   Comparisons ignore case, accents, periods, apostrophes and spacing ("St. Johns" is St. John's). A generated place pack's `match.names` are the
    place's short and everyday names ("Red Deer", "Siksika", "Fort McMurray"); a name two places share is kept only
    by the one municipality among them, else dropped (so "Taber" alone falls back).
 3. `case.authority` (the reviewer code) equals a pack's `authority.reviewer_code` → `reviewer_code`.

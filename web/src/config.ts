@@ -13,8 +13,8 @@ type PlaceRow = { id: string; name: string; aliases: string[]; province: string;
 const PLACES: PlaceRow[] = placeIndex.places;
 /** In Alberta the short name when it is unambiguous ("Red Deer"), else the legal name; elsewhere the full name ("Ontario"). */
 const shown = (p: PlaceRow) => (p.province === "AB" ? p.aliases[0] ?? p.name : p.name);
-/** The registry's key rule: case, accents, curly apostrophes and spacing do not matter. */
-const fold = (s: string) => s.replace(/[\u2018\u2019]/g, "'").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+/** The registry's key rule: case, accents, periods, apostrophes and spacing do not matter ("St. Johns"). */
+const fold = (s: string) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.'\u2018\u2019]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
 
 /**
  * Places the applicant can pick: every Alberta place, then the places outside Alberta that Batatis

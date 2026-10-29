@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -53,10 +54,9 @@ class Resolution:
 
 
 def _key(value: str | None) -> str:
-    """Case-, accent- and curly-apostrophe-free: "Tsuut\u2019ina", "Kikino Métis" and "Montreal" match."""
-    text = (value or '').replace('\u2019', "'").replace('\u2018', "'")
-    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
-    return ' '.join(text.split()).casefold()
+    """Case-, accent-, period- and apostrophe-free: "Tsuut\u2019ina", "Kikino Métis", "Montreal" and "St. Johns" match."""
+    text = unicodedata.normalize('NFKD', value or '').encode('ascii', 'ignore').decode()
+    return ' '.join(re.sub(r"[.']", '', text).split()).casefold()
 
 
 def place_pack(place: Place) -> JurisdictionPack:
@@ -210,13 +210,18 @@ class Registry:
 
     # Views
 
+    def _shared(self, pack: JurisdictionPack) -> ProvinceShared | None:
+        """The province's items, where its Act applies: never on reserve or federal land, outside the province,
+        or at a place whose office Batatis has not confirmed."""
+        return None if pack.authority.kind in OUTSIDE_THE_ACT else self.provinces.get(pack.province)
+
     def forms(self, pack: JurisdictionPack) -> list[ResolvedForm]:
-        shared = self.provinces.get(pack.province)
+        shared = self._shared(pack)
         return ([ResolvedForm(**f.model_dump(), scope='province') for f in (shared.forms if shared else [])]
                 + [ResolvedForm(**f.model_dump(), scope='local') for f in pack.forms])
 
     def detail(self, pack: JurisdictionPack) -> JurisdictionDetail:
-        shared = self.provinces.get(pack.province)
+        shared = self._shared(pack)
         notes = ([ResolvedNote(**n.model_dump(), scope='province') for n in (shared.process_notes if shared else [])]
                  + [ResolvedNote(**n.model_dump(), scope='local') for n in pack.process_notes])
         return JurisdictionDetail(
