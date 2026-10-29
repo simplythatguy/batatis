@@ -2,6 +2,7 @@
 import pytest
 
 from engine.codes import Codes
+from engine.completeness import check_completeness
 from engine.models import Case, Fact, Source
 from engine.path_decision import decide_path
 from engine.process_fields import process_fields
@@ -21,6 +22,153 @@ def soffit(**overrides):
     facts = [fact('project.description', 'Aluminum soffit along the north wall.')]
     facts += [fact(field, value) for field, value in values.items() if value is not None]
     return Case(facts=facts)
+
+
+def window_facts(**overrides):
+    values = dict(ebf_area_m2=30, glazed_area_m2=4, fire_response_over_10_min=False,
+                  sprinklered=False, glass_blocks=False, adjacent_rooms_sprinklered=False,
+                  faces_own_detached_garage=False)
+    values.update(overrides)
+    return [fact(field, value) for field, value in values.items() if value is not None]
+
+
+@pytest.mark.parametrize('description', [
+    'Aluminum soffit along the north wall.', 'Window area in the north wall.', 'North wall work.',
+])
+def test_a_passing_component_cannot_hide_another_departure(description):
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts += window_facts() + [fact('project.description', description)]
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and decision.firm
+    assert decision.rule_id == 'glazed-openings-houses'
+    assert len(process_fields(case, Codes())) == 6
+
+
+@pytest.mark.parametrize('field,value', [
+    ('variance_requested', True), ('pathway', 'alternative'), ('journey.route', 'variance'),
+    ('alternative_description', 'We will omit the sheathing on this wall.'),
+])
+def test_a_rule_outside_its_scope_does_not_close_a_requested_variance(field, value):
+    case = soffit(storeys=5, building_area_m2=100)
+    case.facts.append(fact(field, value))
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and not decision.firm
+    assert len(process_fields(case, Codes())) == 6
+
+
+@pytest.mark.parametrize('departing', [False, True])
+def test_missing_inputs_survive_alongside_a_resolved_component(departing):
+    case = soffit() if departing else soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts.append(fact('glazed_area_m2', 4))
+    decision = decide_path(case)
+    assert decision.path == ('alternative' if departing else 'unresolved')
+    assert decision.firm is departing
+    assert decision.missing == ('ebf_area_m2',) and decision.asks_rule_inputs
+    assert len(process_fields(case, Codes())) == (6 if departing else 0)
+
+
+def test_a_requested_variance_keeps_unresolved_scope_with_a_passing_component():
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts += [fact('glazed_area_m2', 4), fact('variance_requested', True)]
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and decision.source == 'recorded' and not decision.firm
+    assert decision.missing == ('ebf_area_m2',) and decision.asks_rule_inputs
+    assert len(process_fields(case, Codes())) == 6
+
+
+def test_a_passing_component_does_not_close_a_stated_wider_departure():
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts += [fact('alternative_description', 'We will omit the structural sheathing on this wall.'),
+                   fact('variance_requested', True)]
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and not decision.firm
+    assert len(process_fields(case, Codes())) == 6
+
+
+def test_an_inapplicable_component_cannot_hide_another_departure():
+    case = soffit()
+    case.facts.append(fact('project.description', 'Unprotected openings and aluminum soffits.'))
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and decision.firm
+    assert decision.rule_id == 'soffits-houses'
+
+
+def test_every_text_mentioned_rule_stays_relevant_even_with_unequal_keyword_counts():
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts.append(fact('project.description', 'Aluminum soffit and overhang beside a window.'))
+    decision = decide_path(case)
+    assert decision.path == 'unresolved' and not decision.firm
+    assert decision.asks_rule_inputs and {'ebf_area_m2', 'glazed_area_m2'} <= set(decision.missing)
+
+
+def test_rule_titles_and_keywords_both_contribute_to_scope():
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts.append(fact('alternative_description',
+                           'Roof soffits near the property line (houses). Also change a fire damper.'))
+    decision = decide_path(case)
+    assert decision.path == 'unresolved' and not decision.firm
+    assert decision.asks_rule_inputs and 'duct_penetrates_rated_separation' in decision.missing
+
+
+def test_missing_inputs_are_collected_once_across_unresolved_rules():
+    case = soffit(storeys=None, building_area_m2=None)
+    case.facts.append(fact('glazed_area_m2', 4))
+    decision = decide_path(case)
+    assert decision.path == 'unresolved' and not decision.firm
+    assert {'storeys', 'building_area_m2', 'ebf_area_m2'} <= set(decision.missing)
+    assert len(decision.missing) == len(set(decision.missing)) and decision.asks_rule_inputs
+
+
+@pytest.mark.parametrize('overrides,field', [
+    ({}, 'soffit_to_property_line_m'),
+    ({'limiting_distance_m': 1.2, 'soffit_to_property_line_m': 0.8}, 'soffit_to_property_line_m'),
+    ({'storeys': 5}, 'storeys'),
+])
+def test_an_unconfirmed_input_cannot_establish_a_firm_path(overrides, field):
+    case = soffit(**overrides)
+    next(item for item in case.facts if item.field == field).status = 'unconfirmed'
+    decision = decide_path(case)
+    assert decision.path == 'unresolved' and not decision.firm
+    assert field in decision.missing and decision.asks_rule_inputs
+
+
+def test_unconfirmed_departure_keeps_a_requested_variance_open_with_its_missing_input():
+    case = soffit()
+    next(item for item in case.facts if item.field == 'soffit_to_property_line_m').status = 'unconfirmed'
+    case.facts.append(fact('variance_requested', True))
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and not decision.firm
+    assert decision.missing == ('soffit_to_property_line_m',) and decision.asks_rule_inputs
+
+
+def test_shared_context_does_not_activate_unmentioned_components():
+    case = Case(facts=[fact(field, value) for field, value in dict(
+        occupancy='single_family', storeys=2, building_area_m2=150, limiting_distance_m=0.3,
+        ebf_area_m2=30, sprinklered='no', fire_response_over_10_min=False).items()])
+    decision = decide_path(case)
+    assert decision.path == 'unresolved' and not decision.firm
+    assert decision.missing == () and not decision.asks_rule_inputs
+
+
+def test_specific_component_facts_are_relevant_without_keywords():
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts.append(fact('project.description', 'North wall work.'))
+    decision = decide_path(case)
+    assert decision.path == 'acceptable' and decision.firm
+    assert decision.missing == () and not decision.asks_rule_inputs
+
+
+def test_aggregate_departure_retains_evidence_and_completeness_requirements():
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts += window_facts()
+    case.provisions = ['9.10.15.4.(1)']
+    codes = Codes()
+    plan = section_d_plan(case, codes)
+    assert plan.items and all(
+        item.recommended_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES for item in plan.items)
+    gaps = check_completeness(case, codes)
+    assert {'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'} <= {
+        gap.field for gap in gaps if gap.section == 'process'}
 
 
 def test_explicit_variance_request_opens_the_alternative_package():
