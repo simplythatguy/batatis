@@ -155,8 +155,9 @@ def test_legacy_variant_names_consume_the_same_shared_policy(context):
     assert b['mitigating_measures']['problem'] == 'unrelated'
     assert b['assumptions_and_limits']['problem'] == 'stated_as_fact'
     assert b['supporting_doc']['problem'] == 'brochure_only'
-    assert b['section_b.consistency']['verdict'] == 'unclear'
-    assert b['section_b.consistency']['lookup_skipped'] is True
+    # Nothing is attached, so there is nothing to compare with Section B (QA 2026-10-28: this was a false
+    # "Attachment contents are absent" item). The missing document is reported by supporting_doc.
+    assert b['section_b.consistency']['verdict'] == 'present'
 
 
 def test_direct_c_and_document_entrypoints_fail_before_using_configured_dependencies():
