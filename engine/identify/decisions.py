@@ -16,7 +16,6 @@ from engine.models import Fact, Source, now
 from engine.models_identify import ArticleDecision, IdentifyResult
 from engine.section_c import section_c_rows
 
-from .compact import requirement_screen
 
 _ARTICLE = re.compile(r'^(\d+\.\d+\.\d+\.\d+\.)')
 DECISIONS = ('yes', 'no', 'not_sure')
