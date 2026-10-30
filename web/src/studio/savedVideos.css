@@ -75,6 +75,17 @@
   padding-right: 4px;
 }
 
+.st-saved-head-acts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.st-saved-head-acts .cf-btn {
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
 .st-saved-title {
   margin: 0;
   font: 400 20px/1.3 var(--cf-font);

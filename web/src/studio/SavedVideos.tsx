@@ -28,15 +28,16 @@ function ago(at: number, now: number): string {
   return `${Math.round(h / 24)}d ago`;
 }
 
-/** One group alone as a finished video (no intro or outro), saved as batatis-<groupId>.mp4|webm. */
-async function download(deck: Deck, room: string, take: TakeInfo, onProgress: (f: number) => void) {
-  const media = await takeMedia(room, take, () => undefined, new AbortController().signal);
+/** Renders the given takes in deck order and hands the file to the browser as <name>.mp4|webm. */
+async function download(deck: Deck, room: string, takes: TakeInfo[], name: string, cards: boolean, onProgress: (f: number) => void) {
+  const media: Record<string, TakeMedia> = {};
+  for (const take of takes) media[take.groupId] = await takeMedia(room, take, () => undefined, new AbortController().signal);
   await preload(deck);
-  const { blob, mime } = await exportVideo({ deck, takes: { [take.groupId]: media }, cards: false, onProgress: (f) => onProgress(f) });
+  const { blob, mime } = await exportVideo({ deck, takes: media, cards, onProgress: (f) => onProgress(f) });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `batatis-${take.groupId}.${mime.includes("mp4") ? "mp4" : "webm"}`;
+  a.download = `${name}.${mime.includes("mp4") ? "mp4" : "webm"}`;
   a.click();
   window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
@@ -79,7 +80,17 @@ export function SavedVideos({ deck, room, upload }: {
       return next;
     });
     set(0);
-    void download(deck, room.code, take, set).catch(() => undefined).finally(() => set(null));
+    // One group alone: no intro or outro.
+    void download(deck, room.code, [take], `batatis-${take.groupId}`, false, set).catch(() => undefined).finally(() => set(null));
+  };
+
+  // Every saved group joined in deck order, with the intro and outro: the video so far, sound included.
+  const [all, setAll] = useState<number | null>(null);
+  const saveAll = () => {
+    if (all !== null || !saved.length) return;
+    setAll(0);
+    void download(deck, room.code, saved.map((g) => room.takes[g.id]), "batatis-demo", true, setAll)
+      .catch(() => undefined).finally(() => setAll(null));
   };
 
   return (
@@ -100,9 +111,15 @@ export function SavedVideos({ deck, room, upload }: {
         <aside className="st-saved" aria-label="Saved videos">
           <header className="st-saved-head">
             <h2 className="st-saved-title">Saved</h2>
-            <button type="button" className="cf-icon-btn" onClick={() => setOpen(false)} aria-label="Close" title="Close">
-              <Icon name="x" size={16} />
-            </button>
+            <span className="st-saved-head-acts">
+              <button type="button" className="cf-btn is-sm" onClick={saveAll} disabled={all !== null || !saved.length}
+                aria-label={all === null ? `Download all ${saved.length} saved as one video` : `Rendering, ${Math.round(all * 100)}%`}>
+                <Icon name="download" size={14} />{all === null ? "Download all" : `${Math.round(all * 100)}%`}
+              </button>
+              <button type="button" className="cf-icon-btn" onClick={() => setOpen(false)} aria-label="Close" title="Close">
+                <Icon name="x" size={16} />
+              </button>
+            </span>
           </header>
           <p className="st-saved-sum">
             {saved.length} of {deck.groups.length} recorded<span aria-hidden="true"> · </span>{clock(recordedMs)} of {clock(plannedMs)}
