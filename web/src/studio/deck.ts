@@ -159,22 +159,22 @@ export const deck: Deck = {
       speaker: 2,
       slides: [
         {
-          kind: "dots", id: "scale-places", title: "Every place, mapped", total: 435, lit: 2,
-          label: "435 places mapped to the office that reviews them", litLabel: "Live today: Calgary, Edmonton",
+          kind: "dots", id: "scale-places", title: "Live in two cities", total: 435, lit: 2,
+          label: "The rest of Alberta, in progress", litLabel: "Calgary, Edmonton",
         },
         {
-          kind: "flow", id: "scale-file", title: "A new city is one file",
+          kind: "flow", id: "scale-file", title: "Adding a city",
           steps: [
-            { label: "One code database", sub: "13,743 provisions" },
-            { label: "One file per office", sub: "its forms and steps" },
-            { label: "Same app", sub: "no code changes" },
+            { label: "New city" },
+            { label: "Add one file", sub: "its forms and steps" },
+            { label: "Same app", sub: "no new code" },
           ],
           active: [1],
         },
       ],
       script: [
-        "🙂 Today we're live in Calgary and Edmonton. And we've mapped four hundred thirty-five places to their local office.",
-        "💪 A new city takes one data file, not new code. Better AI won't earn an officer's trust. ⏸️ We... WILL.",
+        "🙂 Right now Batatis only works in Calgary and Edmonton. We're working on adding the rest of Alberta.",
+        "🙂 Adding a new city is pretty easy. We just add a file with that city's forms and steps. ⏸️ No new code.",
       ],
     },
     {
