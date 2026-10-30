@@ -28,6 +28,7 @@ export async function exportVideo(opts: {
   signal?: AbortSignal;
   canvas?: HTMLCanvasElement;
   cards?: boolean;
+  monitor?: boolean;
 }): Promise<{ blob: Blob; mime: string }> {
   const { deck, takes, onProgress, signal } = opts;
   const intro = opts.cards === false ? 0 : INTRO_MS;
@@ -74,7 +75,10 @@ export async function exportVideo(opts: {
             v.addEventListener("loadeddata", () => resolve(), { once: true });
             v.addEventListener("error", () => reject(new Error("A take could not be read.")), { once: true });
           });
-          audio.createMediaElementSource(v).connect(dest);
+          // Routed into the recording; without the monitor, the speakers stay silent while it renders.
+          const source = audio.createMediaElementSource(v);
+          source.connect(dest);
+          if (opts.monitor) source.connect(audio.destination);
           return v;
         }),
       ),
