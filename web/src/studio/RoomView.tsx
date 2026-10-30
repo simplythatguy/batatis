@@ -95,22 +95,22 @@ export function Room({ deck, room, serverLive, me, camera, apply, onLeave }: {
   const missing = deck.groups.filter((g) => !complete(room.takes[g.id]) || progress[g.id] !== undefined);
   const total = deckMs(deck);
   const assign = (gi: number, personId: string | null) => void roomApi.assign(room.code, deck.groups[gi].id, personId).then(apply);
-  // When someone joins, unassigned groups go to their speaker slot: the room's first, second or third
-  // person to join. Only on a join, so a group set to Nobody stays that way.
-  const seen = useRef(0);
+  // Each laptop claims its own speaker slot once: the slot is where its person first joined, remembered per
+  // room, so leaving and rejoining keeps the same groups. Only free groups are claimed, and only on joining,
+  // so a group someone set to Nobody stays that way.
+  const claimed = useRef(false);
   useEffect(() => {
-    const people = room.people;
-    if (people.length <= seen.current) {
-      seen.current = people.length;
-      return;
-    }
-    seen.current = people.length;
-    const open = deck.groups.filter((g) => !room.assignments[g.id] && people[g.speaker]);
-    if (!open.length) return;
+    if (claimed.current || !room.people.some((p) => p.id === me.id)) return;
+    claimed.current = true;
+    const key = `batatis.studio.slot.${room.code}.${me.name.toLowerCase()}`;
+    const stored = Number(localStorage.getItem(key));
+    const slot = Number.isInteger(stored) && localStorage.getItem(key) !== null ? stored : room.people.findIndex((p) => p.id === me.id);
+    localStorage.setItem(key, String(slot));
+    const mine = deck.groups.filter((g) => g.speaker === slot && !room.assignments[g.id]);
     void (async () => {
-      for (const g of open) apply(await roomApi.assign(room.code, g.id, people[g.speaker].id));
+      for (const g of mine) apply(await roomApi.assign(room.code, g.id, me.id));
     })().catch(() => undefined);
-  }, [apply, deck.groups, room.assignments, room.code, room.people]);
+  }, [apply, deck.groups, me.id, me.name, room.assignments, room.code, room.people]);
   const remove = (id: string) => void roomApi.leave(room.code, id).then((next) => {
     apply(next);
     if (id === me.id) onLeave();

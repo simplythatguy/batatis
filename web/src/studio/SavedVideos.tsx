@@ -193,8 +193,12 @@ function Player({ deck, room, index, take, saving, onSave, onClose }: {
   const [paused, setPaused] = useState(false);
   const group = deck.groups[index];
   const length = take.durationMs;
+  // The room poll hands over a fresh take object every 2 s; only a different take restarts the player.
+  const current = useRef(take);
+  current.current = take;
 
   useEffect(() => {
+    const take = current.current;
     const ctl = new AbortController();
     const c = canvas.current!;
     c.width = 1920;
@@ -244,7 +248,8 @@ function Player({ deck, room, index, take, saving, onSave, onClose }: {
       video.current = null;
       stage.destroy();
     };
-  }, [deck, index, length, room, take]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deck, index, length, room, take.id]);
 
   const toggle = () => {
     const v = video.current;
