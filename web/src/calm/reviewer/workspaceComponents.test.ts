@@ -88,3 +88,25 @@ test("a recorded determination is dated like the rest of the app, not by the bro
   assert.ok(line.includes(`REF-1 · recorded by Officer · ${queue.sentLabel(at)}`), line);
   assert.ok(!line.includes(new Date(at).toLocaleString()), line);
 });
+
+test("the professional requirement is decided on its own row, and a drafted question is named by itself", async () => {
+  const h = await componentHarness(new URL("./OfficerReview.tsx", import.meta.url), "FindingRow", deps);
+  const professional = { ...finding, key: "professional_requirement:requirement_unresolved", field: "professional_requirement", label: "professional involvement" };
+  let tree = await h.render({ row: { finding: professional, state: state({ state: "verify", locked: true }), askable: false }, caseId: "c1", files, editable: true,
+    onCall() {}, onAddOwn() {}, action: { type: "button", props: { children: "Decide" }, key: null } });
+  assert.equal(button(tree, (n) => text(n).startsWith("Ask")), undefined, "the officer decides it; it is not asked of the applicant");
+  assert.match(text(tree), /Decide/);
+  const question = { ...finding, key: "draft-question:draft_1:0", field: "drafting.questions.draft_1.0", label: "Open question from the drafted wording",
+    message: "Who inspects the door closers, and how often?", status: "missing", severity: "warning" };
+  tree = await h.render({ row: { finding: question, state: state({ key: question.key }), askable: true }, caseId: "c1", files, editable: true, onCall() {}, onAddOwn() {} });
+  assert.match(text(tree), /Who inspects the door closers, and how often\?/);
+  assert.doesNotMatch(text(button(tree, (n) => n.props["aria-expanded"] !== undefined && text(n).length > 0)), /Open question from the drafted wording/);
+  h.unmount();
+});
+
+test("an unchecked relevance screen says so in plain words", () => {
+  const view = packageView.officerFinding({ key: "section_c.relevance:presence", field: "section_c.relevance", label: "relevance of the cited provision", problem: "lookup_skipped",
+    message: "Keyword screening was skipped for 9.10.11.2.(2) because no topic rule is available; relevance remains uncertain." });
+  assert.equal(view.title, "Relevance of the cited provision");
+  assert.doesNotMatch(view.note, /Keyword screening|topic rule/);
+});

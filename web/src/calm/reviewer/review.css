@@ -472,6 +472,8 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .ap-tag { padding: 0; border: 0; background: none; color: var(--cf-text-2); font: 500 13px var(--cf-font); white-space: nowrap; cursor: pointer; }
 .ap-tag.is-static { color: var(--cf-text-3); cursor: default; }
 .ap-empty { margin: 10px 0 0; color: var(--cf-text-3); font-size: 14px; }
+.ap-also { margin-top: 6px; }
+.ap-also-h { padding: 12px 0; color: var(--cf-text-3); font-size: 14px; }
 .rw-legacy { margin: 28px 0 0; }
 .rw-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px; margin-top: 22px; }
 .rw-scope { margin: 14px 0 0; color: var(--cf-text-3); font-size: 13px; }

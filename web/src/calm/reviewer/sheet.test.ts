@@ -59,9 +59,21 @@ test("the officer sheet links only the latest confirmed file-source binding and 
     fact("evidence.removed.file_ref", null, { status: "unconfirmed", source: { type: "user_click", ref: "Applicant" } }),
   ], section_c: [] } as never);
   assert.deepEqual(s.documents, [
-    { id: "attached", title: "SYNTHETIC attached report", type: "evaluation", author: "SYNTHETIC author", date: "SYNTHETIC revision B", fileId: "file_current", fileName: "SYNTHETIC source.pdf" },
-    { id: "copied", title: "SYNTHETIC copied id", type: null, author: null, date: null, fileId: null, fileName: null },
-    { id: "removed", title: "SYNTHETIC removed binding", type: null, author: null, date: null, fileId: null, fileName: null },
+    { id: "attached", ids: ["attached"], title: "SYNTHETIC attached report", type: "evaluation", author: "SYNTHETIC author", date: "SYNTHETIC revision B", fileId: "file_current", fileName: "SYNTHETIC source.pdf" },
+    { id: "copied", ids: ["copied"], title: "SYNTHETIC copied id", type: null, author: null, date: null, fileId: null, fileName: null },
+    { id: "removed", ids: ["removed"], title: "SYNTHETIC removed binding", type: null, author: null, date: null, fileId: null, fileName: null },
   ]);
   assert.equal(s.supporting.find(row => row.label === "Documents listed")?.value, "3 documents", "the summary counts documents; titles stay only in their detailed rows");
+});
+
+test("a study listed once per objective is one document, with its file", () => {
+  const listing = (id: string, file: string) => [
+    fact(`evidence.${id}.title`, "SYNTHETIC city engineering study"),
+    fact(`evidence.${id}.responsible_party`, "SYNTHETIC city"),
+    fact(`evidence.${id}.date`, "v02, 31 July 2024"),
+    fact(`evidence.${id}.file_ref`, file, { source: { type: "file", ref: file, quote: "study.pdf" } }),
+  ];
+  const s = sheetFromEngine({ facts: [...listing("os", "file_a"), ...listing("op", "file_b"), fact("evidence.other.title", "SYNTHETIC drawing")], section_c: [] } as never);
+  assert.deepEqual(s.documents.map((d) => [d.ids, d.fileId]), [[["os", "op"], "file_a"], [["other"], null]]);
+  assert.equal(s.supporting.find(row => row.label === "Documents listed")?.value, "2 documents");
 });

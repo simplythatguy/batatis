@@ -14,6 +14,9 @@ export type ApplicantDraftActivity =
   | { kind: "generating" }
   | { kind: "deciding"; draftId: string };
 
+/** A drafting request the engine could not complete; its status and internal terms never show. */
+export const DRAFT_FAILED = "We couldn't draft this part. Try again.";
+
 export function applicantDraftHref(field: string): string {
   return `#/review?${new URLSearchParams({ focus: `draft:${field}` })}`;
 }
@@ -78,22 +81,10 @@ export function statementDrafts(record: Pick<DraftingRecord, "drafts"> | null): 
 }
 
 /**
- * The six statements are reviewed on one screen while drafting can run. Signed out, a saved
- * (read-only) application, or a drafting request that failed or returned nothing for them falls
- * back to one card per statement.
+ * The six statements are reviewed on one screen whenever drafting can run, including after a failed
+ * or partial request: the card keeps its place and offers to draft again. Signed out or a saved
+ * (read-only) application falls back to one card per statement.
  */
-export function statementReview(s: { phase: AccountPhase; readOnly: boolean; drafting: Pick<DraftingRecord, "drafts" | "stale"> | null; error: string }): boolean {
-  if ((s.phase !== "signed-in" && s.phase !== "probing") || s.readOnly) return false;
-  const drafted = statementDrafts(s.drafting).size > 0;
-  if (s.error && !drafted) return false;
-  return drafted || !s.drafting || s.drafting.stale;
-}
-
-/**
- * Why a drafting request fell back to one card per statement (a failure or nothing drafted for
- * them), shown once on the first statement card. Empty when the review stands or was never offered.
- */
-export function statementFallbackNote(s: Parameters<typeof statementReview>[0]): string {
-  if ((s.phase !== "signed-in" && s.phase !== "probing") || s.readOnly || statementReview(s)) return "";
-  return s.error || "No statements were drafted.";
+export function statementReview(s: { phase: AccountPhase; readOnly: boolean }): boolean {
+  return (s.phase === "signed-in" || s.phase === "probing") && !s.readOnly;
 }

@@ -80,7 +80,7 @@ def test_the_notice_names_no_provider_and_still_makes_its_disclosures():
     first, second = PRIVACY_NOTICE.split('. ', 1)
     assert first == ('Batatis automatically removes the names, contact details and addresses it recognizes '
                      'before any text is sent to an AI provider')
-    assert 'In live mode' in second and 'United States' in second
+    assert 'When AI is on' in second and 'United States' in second
     assert 'third-party AI service providers' in second and 'API data-use terms' in second
     assert f'unsigned drafts expire after {RETENTION_DAYS} inactive days' in second
     assert 'completed applications after 730 inactive days' in second

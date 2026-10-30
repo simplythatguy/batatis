@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap, type UploadedFile } from "./api/client";
 import type { Case as EngineCase, DraftingRecord, IntakeResult, Question as PlanQuestion, RequirementRecord } from "./api/types.gen";
-import { acceptedApplicantFact, applicantDraftInputKey, unchangedDraftField, type ApplicantDraftActivity, type ApplicantDraftCommand } from "./applicantDrafts";
+import { acceptedApplicantFact, applicantDraftInputKey, DRAFT_FAILED, unchangedDraftField, type ApplicantDraftActivity, type ApplicantDraftCommand } from "./applicantDrafts";
 import { forApplicant, type CompletenessRecord } from "./humanReview";
 import { hrefFor } from "./gapHref";
 import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, isReadOnlyCase, needsReconcile, noteConflict, notePosted, noteShownSelection, pushDeletedEvidence, pushDraft, pushListedEvidence, refreshGaps, selectionKey, type EvidenceOutcome } from "./api/sync";
@@ -812,7 +812,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         }
         setDraftingError(isCaseGone(error) ? GONE_NOTE : isCaseConflict(error)
           ? "The saved application changed. Review the save conflict, then draft again."
-          : error instanceof Error ? error.message : failureText(error));
+          : error instanceof EngineError ? (command.kind === "generate" ? DRAFT_FAILED : failureText(error))
+            : error instanceof Error ? error.message : failureText(error));
         return false;
       }
     });

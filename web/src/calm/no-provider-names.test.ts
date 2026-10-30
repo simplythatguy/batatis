@@ -29,7 +29,7 @@ test("the privacy notice names no provider, carries no link, and keeps its three
   assert.doesNotMatch(PRIVACY_NOTICE, PROVIDER);
   assert.doesNotMatch(PRIVACY_NOTICE, /https?:\/\/|\(|\)/, "no URL, so Settings has no link to build");
   assert.match(PRIVACY_NOTICE, /removes the names, contact details and addresses it recognizes before any text is sent to an AI provider/);
-  assert.match(PRIVACY_NOTICE, /In live mode, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms/);
+  assert.match(PRIVACY_NOTICE, /When AI is on, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms/);
   assert.match(PRIVACY_NOTICE, /account drafts after 180 inactive days/);
   assert.match(PRIVACY_NOTICE, /Deleting an application removes its stored data, files and background work\.$/);
 });

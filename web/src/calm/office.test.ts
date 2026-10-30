@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCovered, officeSuggestion, resolveOffice, submissionOfficeReason } from "../config.ts";
+import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCovered, officeSuggestion, resolveOffice, siteElsewhere, submissionOfficeReason } from "../config.ts";
 import { emptyCase } from "../intake.ts";
 import { reducer } from "../model.ts";
 import { jurisdictionBody } from "../rules.ts";
@@ -66,4 +66,15 @@ test("the city comes from its own part of the address, never from a street named
   assert.equal(suggested("0000 Example Road SW Calgary AB"), "calgary");
   assert.equal(suggested("0000 Calgary Trail NW Edmonton AB"), "edmonton");
   assert.equal(suggested("0000 Calgary Trail NW, Red Deer, AB"), null);
+});
+
+test("a site outside Calgary and Edmonton is named as soon as the address is read", () => {
+  const at = (address: string) => reducer(emptyCase("owner"), { type: "setDetail", field: "municipalAddress", value: address, section: "B" });
+  assert.equal(siteElsewhere(at("4920 51 Street, Red Deer AB T4N 2A8")), "Red Deer");
+  assert.equal(siteElsewhere(at("0000 Example Road, Red Deer, AB")), "Red Deer");
+  assert.equal(siteElsewhere(at("0000 Calgary Trail NW, Edmonton, AB")), null);
+  assert.equal(siteElsewhere(at("1120 17 Avenue SW, Calgary")), null);
+  assert.equal(siteElsewhere(at("1120 17 Avenue SW")), null, "no city part: not known, so nothing is said");
+  assert.equal(siteElsewhere(reducer(emptyCase("owner"), { type: "setAuthority", authority: "Lacombe County" })), "Lacombe County");
+  assert.equal(siteElsewhere(reducer(at("0000 Example Road, Red Deer, AB"), { type: "setAuthority", authority: "edmonton" })), null, "the chosen office wins");
 });

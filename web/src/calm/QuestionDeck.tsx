@@ -600,7 +600,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   const session = useSession();
   const { app, locked, readOnly } = useCurrentApplication();
   const { onAnswer, onDeparture, decisionNoteFor } = useCandidateAnswer();
-  const { options: deckExtras, extras, fallbackNote } = useDeckExtras();
+  const { options: deckExtras, extras } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
   // A keyword lead opened from the grouped triage (or a saved link) stays on the deck while you answer it.
   const [focusedCandidate, setFocusedCandidate] = useState(focus?.startsWith("cand-") ? focus : undefined);
@@ -645,9 +645,6 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   }, [queueSig]);
 
   const account = useAccount();
-  // A drafting request that fell back to the six cards says why once, on the first open one.
-  const processCards = all.filter((i) => i.kind === "process");
-  const fallbackKey = fallbackNote ? (processCards.find((i) => !i.done) ?? processCards[0])?.key : undefined;
   const savedDraft = (() => {
     if (!item) return "";
     if (item.kind === "route-detail") return String(factFor(c, "journey.departure")?.value ?? "");
@@ -1311,7 +1308,6 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.deferred && item.kind !== "plan" && item.kind !== "product-scope" && item.kind !== "rule-input" && <p className="cf-note" role="status">{item.deferred === "later" ? "Saved for later" : item.deferred === "designer" ? "For your designer" : "Not sure"} · open on Review</p>}
             {draftConflict && <p className="cf-note" role="status">The saved answer changed. Your unfinished text is kept here; review it before confirming.</p>}
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
-            {item.key === fallbackKey && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{fallbackNote}</p>}
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}

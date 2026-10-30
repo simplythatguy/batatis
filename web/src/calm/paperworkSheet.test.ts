@@ -42,7 +42,7 @@ test("rendering and Done never accept untapped paperwork defaults", async () => 
   m.h.unmount();
 });
 
-test("Done saves chosen defaults, role and office together; Later remains one honest open row", async () => {
+test("each tap saves at once (Done only moves on); Later remains one honest open row", async () => {
   const m = await mounted();
   let tree = await m.render();
   for (const label of ["Today", "Same as the site address", "Same as the owner"]) button(tree, label).props.onClick();
@@ -50,10 +50,13 @@ test("Done saves chosen defaults, role and office together; Later remains one ho
   button(tree, "One building site").props.onClick({ currentTarget: { closest: () => null } });
   nodes(tree, (n) => n.type === "button" && n.props["aria-label"] === "Later: Legal description")[0].props.onClick();
   button(tree, "Edmonton").props.onClick();
-  assert.equal(m.actions.length, 0, "all edits remain buffered until Done");
+  assert.ok(m.actions.length > 0, "each tap goes to the case, so the header's Saved is the server's");
+  const tapped = m.actions.length;
   tree = await m.render();
   assert.match(text(tree), /Later/);
   submit(tree);
+  assert.equal(m.actions.length, tapped, "Done writes nothing more");
+  assert.equal(m.done(), 1);
   const c = JSON.parse(JSON.stringify(m.case()));
   assert.equal(model.factFor(c, "date")?.value, "2026-10-26");
   assert.equal(model.factFor(c, "mailingAddress")?.value, "10234 87 Ave NW, Edmonton");
@@ -146,4 +149,18 @@ test("the Office row says Batatis prepares applications only for Calgary and Edm
     assert.equal(text(office), line, authority);
     m.h.unmount();
   }
+});
+
+test("typed text reaches the case on every keystroke, and the field keeps the space being typed", async () => {
+  const m = await mounted();
+  let tree = await m.render();
+  const permit = () => nodes(tree, (n) => n.type === "input" && n.props["aria-label"] === "Permit number")[0];
+  permit().props.onChange({ target: { value: "BP-2026 " } });
+  assert.equal(model.factFor(m.case(), "permit")?.value, "BP-2026", "saved without pressing Done");
+  tree = await m.render();
+  assert.equal(permit().props.value, "BP-2026 ", "the trailing space stays while typing");
+  permit().props.onBlur();
+  tree = await m.render();
+  assert.equal(permit().props.value, "BP-2026");
+  m.h.unmount();
 });

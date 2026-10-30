@@ -4,7 +4,7 @@ import type { FieldReading, Finding, InputFile, Pointer, OfficerWorkspace, Revie
 import { changeLabel, formValue } from "./formFields.ts";
 import type { SheetView } from "./sheet.ts";
 import { visibleSubmissionChanges } from "./submissionChanges.ts";
-import { allAnchors, anchoredItems, anchorFor, changedFields, findingSources, sheetRows, sinceReturn, targetOptions, visibleFinding, withThe, workspaceDecision, type SheetAnchor } from "./workspaceView.ts";
+import { allAnchors, anchoredItems, anchorFor, changedFields, findingSources, localTally, sheetRows, sinceReturn, targetOptions, visibleFinding, withThe, workspaceDecision, type SheetAnchor } from "./workspaceView.ts";
 
 const anchors: SheetAnchor[] = [
   { id: "owner", section: "A", field: "owner_name", label: "Owner" },
@@ -158,4 +158,27 @@ test("the change line speaks of the return, and an officer's own re-run adds no 
   assert.equal(sinceReturn(null, versions), "");
   assert.equal(withThe("a named registered professional"), "a named registered professional");
   assert.equal(withThe("applicant signature"), "the applicant signature");
+});
+
+test("the headline counts follow the officer's ✕ before the save returns", () => {
+  const f = (key: string, severity: Finding["severity"]) => ({ key, severity } as Finding);
+  const findings = [f("a", "warning"), f("b", "warning"), f("pro", "warning"), f("gap", "blocking")];
+  const items = [{ finding_key: "a", included: true, text: "A" }, { finding_key: "b", included: true, text: "B" },
+    { finding_key: null, included: true, text: "Own item" }, { finding_key: null, included: true, text: " " }];
+  const states = new Map([["a", { state: "ask" as const, locked: false }], ["b", { state: "ask" as const, locked: false }],
+    ["pro", { state: "verify" as const, locked: true }], ["gap", { state: "verify" as const, locked: false }]]);
+  assert.deepEqual(localTally(findings, states, items, 1), { required: 3, asked: 3 }, "an empty own item is not an ask yet");
+  states.set("a", { state: "dismissed", locked: false });
+  states.set("b", { state: "dismissed", locked: false });
+  states.set("gap", { state: "dismissed", locked: false });
+  assert.deepEqual(localTally(findings, states, items.slice(0, 2), 0), { required: 1, asked: 0 });
+});
+
+test("a study listed twice anchors both listings to its one row", () => {
+  const sheet = { applicant: [], project: [], alternative: { label: "Proposed alternative", value: null, required: true }, references: [], process: [], supporting: [],
+    documents: [{ id: "os", ids: ["os", "op"], title: "Study", fileId: "file_a", fileName: "study.pdf", type: null, author: null, date: null }], questions: [] } as SheetView;
+  const session = { documents: [{ id: "os", title: { known: true, value: "Study" } }, { id: "op", title: { known: true, value: "Study" } }], citations: [], section_c: [] } as unknown as ReviewSession;
+  const all = allAnchors([], sheet, session);
+  assert.deepEqual(all.filter(a => a.section === "D").map(a => a.id), ["D:document:os"]);
+  assert.equal(anchorFor({ section: "D", field: "evidence.op.date" }, all), "D:document:os");
 });

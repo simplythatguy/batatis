@@ -128,7 +128,7 @@ test("description rows carry no source label, while a derived value retains its 
   const h = await componentHarness(new URL("./ReadCards.tsx", import.meta.url), "UnderstoodFacts", {
     "../store": { useCase: () => ({ c, dispatch() {} }) },
     "../model": await import("../model.ts"), "../intakeView": await import("../intakeView.ts"),
-    "./journey": journey, "./icons": { Icon24: "icon" },
+    "../config": await import("../config.ts"), "./journey": journey, "./icons": { Icon24: "icon" },
   });
   const tree = await h.render({ item: deck.buildDeck(c, []).find((i) => i.kind === "understood") });
   assert.equal(nodes(tree, (node) => node.type === "span" && node.props.className === "cf-source-chip").length, 0, "the applicant's own words need no source label");
@@ -297,7 +297,7 @@ test("a reading row can be corrected without restoring the old value on confirma
   const h = await componentHarness(new URL("./ReadCards.tsx", import.meta.url), "UnderstoodFacts", {
     "../store": { useCase: () => ({ c, dispatch: (action) => { c = reducer(c, action); } }) },
     "../model": await import("../model.ts"), "../intakeView": await import("../intakeView.ts"),
-    "./journey": journey, "./icons": { Icon24: "icon" },
+    "../config": await import("../config.ts"), "./journey": journey, "./icons": { Icon24: "icon" },
   });
   const render = () => h.render({ item: deck.buildDeck(c, [], { includeDone: true }).find((i) => i.kind === "understood") });
   const click = (node) => node.props.onClick({ currentTarget: { closest: () => ({ open: true }) } });

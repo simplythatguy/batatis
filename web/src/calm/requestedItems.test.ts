@@ -45,6 +45,7 @@ test("unknown custom instructions stay for review until a current check can supp
   const c = emptyCase("contractor");
   const custom = { gap_id: "historical-custom", note: "Review the drawing legend as discussed." };
   assert.equal(requestedItemRow(c, [], custom, true).state, "review");
+  assert.equal(requestedItemRow(c, [], custom, true).status, "", "the officer's words are the instruction; no extra tag");
   assert.equal(requestedItemRow(c, [], custom, true).href, "#/application");
   assert.equal(requestedItemRow(c, [], custom, true, true).state, "pending");
   const warning = requestedItemRow(c, [{ ...gap, submissionBlocking: false }], item, true);

@@ -108,9 +108,10 @@ def test_information_request_items_are_addressed_to_the_applicant():
                    message='Failure is not mentioned. Ask the applicant to state it; the review does not judge adequacy.',
                    pointers=[Pointer(file='case:x')])
     texts = [item.text for item in ir.build([finding, demo]).items]
-    assert texts == ['Please include the testing procedures. No testing procedures were named.',
-                     'Please state in the documentation performance under failure conditions, or say that it does not '
-                     'apply. Failure is not mentioned.']
+    # The applicant's case is filed under Section D on their screens (app audit 2026-10-29, row 5).
+    assert texts == ['Please include the testing procedures (Section D). No testing procedures were named.',
+                     'Please state in the documentation performance under failure conditions (Section D), or say '
+                     'that it does not apply. Failure is not mentioned.']
     assert not any('Ask the applicant' in t for t in texts)
 
 

@@ -8,6 +8,7 @@ import { useId, useState } from "react";
 import { useProvisionText } from "../api/sectionC";
 import type { Fork, PreApplication } from "../api/types.gen";
 import { NrcCredit } from "../components";
+import { siteElsewhere } from "../config";
 import { forkLine, HALF_PLAIN, planInput, scopeRedirect, snippet, stageViews, type ReadCopy, type Snippet } from "../intakeView";
 import { useCase } from "../store";
 import type { Candidate } from "../types";
@@ -51,6 +52,8 @@ export function UnderstoodFacts({ item }: { item: DeckItem }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
+  // Said here, before any rules are asked, not first at Send.
+  const elsewhere = siteElsewhere(c);
   return <div className="cf-understood">{item.rows?.map((row) => {
     const section = DETAIL_IDS.has(row.field) && ["owner", "representative", "mailingAddress", "date"].includes(row.field) ? "A" : "B";
     const fact: DeckItem = { key: row.key, kind: "fact", section, stage: "understand", answerer: "you", eyebrow: "Understand", title: row.copy.title, context: "", why: "", ref: row.ref, field: row.field, ids: row.ids, done: row.done, optional: false };
@@ -94,7 +97,7 @@ export function UnderstoodFacts({ item }: { item: DeckItem }) {
         <button type="button" className="cf-link-btn" onClick={(e) => fix("not_sure", e.currentTarget.closest("details"))}>Not sure</button>
       </div>
     </details>;
-  })}</div>;
+  })}{elsewhere && <p className="cf-note" role="note"><Dot tone="warning" />Batatis prepares applications only for Calgary and Edmonton, not {elsewhere}.</p>}</div>;
 }
 
 export function ProductRouteNotice() {

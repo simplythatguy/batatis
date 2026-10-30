@@ -5,7 +5,7 @@
  * so the counts agree everywhere.
  */
 import { useMemo } from "react";
-import { statementFallbackNote, statementReview } from "../applicantDrafts";
+import { statementReview } from "../applicantDrafts";
 import { useCase } from "../store";
 import { useAccount } from "./account";
 import { useCurrentApplication } from "./begin";
@@ -14,14 +14,13 @@ import type { DeckOptions } from "./deck";
 import { useSession } from "./session";
 
 /** Combine shared engine extras and visit choices into the options used by every deck consumer. */
-export function useDeckExtras(): { options: DeckOptions; extras: CaseExtras; fallbackNote: string } {
-  const { c, engineId, factsEpoch, drafting, draftingError } = useCase();
+export function useDeckExtras(): { options: DeckOptions; extras: CaseExtras } {
+  const { c, engineId, factsEpoch } = useCase();
   const extras = useCaseExtras(engineId, factsEpoch, c.authority);
   const session = useSession();
   const { phase } = useAccount();
   const { readOnly } = useCurrentApplication();
-  const statements = { phase, readOnly, drafting, error: draftingError };
-  const review = statementReview(statements);
+  const review = statementReview({ phase, readOnly });
   const options = useMemo<DeckOptions>(() => ({
     rules: extras.rules,
     storedRules: extras.caseRules,
@@ -31,6 +30,5 @@ export function useDeckExtras(): { options: DeckOptions; extras: CaseExtras; fal
     benchmark: extras.identify?.benchmark ?? null,
     statements: review ? "review" : "cards",
   }), [extras.rules, extras.caseRules, extras.checklists, extras.identify, session.packages, review]);
-  // Why a drafting request fell back to one card per statement; the deck shows it once.
-  return { options, extras, fallbackNote: statementFallbackNote(statements) };
+  return { options, extras };
 }

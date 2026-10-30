@@ -97,7 +97,7 @@ test("the panel generates once per click, selects one draft, accepts/rejects thr
   assert.equal(buttons(tree, "Accept")[0].props.disabled, true);
   assert.equal(buttons(tree, "Reject")[0].props.disabled, true);
   assert.equal(buttons(tree, "Draft my application")[0].props.disabled, false);
-  assert.match(text(tree), /Previous or unverified input/);
+  assert.match(text(tree), /Written from older answers\. Draft again before you accept it\./);
   store.draftingStale = false;
   locked = true;
   tree = await h.render();

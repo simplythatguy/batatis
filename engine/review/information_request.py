@@ -26,15 +26,14 @@ FORBIDDEN = re.compile(
 
 
 def _where(finding: Finding) -> str:
-    pointer = finding.pointers[0] if finding.pointers else None
-    parts = []
-    if finding.section in 'ABCD':
-        parts.append(f'Section {finding.section}')
-    # A form widget's internal name ("Signature1") means nothing to the applicant; the page does.
-    if pointer is not None:
-        if pointer.page:
-            parts.append(f'page {pointer.page} of {pointer.file}')
-    return ', '.join(parts)
+    # The applicant answers in their application's sections; their case (the alternative-path items) is
+    # filed under Section D on their screens. The reviewed package file, its pages and its form widgets
+    # ("Signature1") are the officer's view, never shown to the applicant.
+    return 'Section D' if finding.section == 'process' else f'Section {finding.section}' if finding.section in 'ABCD' else ''
+
+
+def _drafted_question(finding: Finding) -> bool:
+    return finding.field.startswith('drafting.questions.')
 
 
 # Finding messages are written for the officer ("Ask the applicant to …"). The request is addressed to
@@ -60,6 +59,9 @@ def _ask_text(finding: Finding) -> str:
     where = _where(finding)
     at = f' ({where})' if where else ''
     label = finding.label
+    if _drafted_question(finding) and finding.message.strip():
+        # The finding's message is the open question itself; it is the request.
+        return f'{finding.message.strip()}{at}'
     if finding.problem in ('signature_unread',):
         return f'Please confirm that the application is signed and dated{at}.'
     if finding.status == 'blank':
@@ -100,6 +102,30 @@ def _ask_text(finding: Finding) -> str:
     return f'Please provide or confirm {_the(label)}{at}. {finding.message}'
 
 
+def _words(text: str) -> str:
+    return ' '.join(re.findall(r'[a-z0-9]+', text.casefold()))
+
+
+def covered(findings: list[Finding]) -> set[str]:
+    """Advisory findings an open drafted question already asks: the same question twice, or a topic
+    ("what happens if maintenance lapses") the question names word for word. The officer checks these
+    rather than sending them again; a blocking finding is never covered."""
+    questions = [f for f in findings if _drafted_question(f) and f.routed_to == 'applicant' and f.message.strip()]
+    out, asked = set(), set()
+    for finding in questions:
+        text = _words(finding.message)
+        if text in asked and finding.severity == 'warning':
+            out.add(finding.key)
+        asked.add(text)
+    for finding in findings:
+        if finding.severity != 'warning' or _drafted_question(finding) or finding.routed_to != 'applicant':
+            continue
+        topic = _words(finding.label)
+        if topic and any(re.search(rf'(?<!\S){re.escape(topic)}(?!\S)', _words(q.message)) for q in questions):
+            out.add(finding.key)
+    return out
+
+
 def item_id(key: str) -> str:
     return 'ir_' + hashlib.sha256(key.encode()).hexdigest()[:10]
 
@@ -118,6 +144,7 @@ def build(findings: list[Finding]) -> InformationRequest:
     from .workspace import target
     items = []
     seen = set()
+    repeats = covered(findings)
     for finding in findings:
         if finding.field in OFFICER_ONLY or finding.routed_to == 'officer':
             continue
@@ -127,10 +154,12 @@ def build(findings: list[Finding]) -> InformationRequest:
         text = _ask(finding)
         if FORBIDDEN.search(text):
             # A message carried from a finding must not smuggle verdict language into a request.
-            text = f'Please provide or confirm {_the(finding.label)}.'
+            where = _where(finding)
+            text = f'Please provide or confirm {_the(finding.label)}{f" ({where})" if where else ""}.'
         items.append(InformationRequestItem(
             id=item_id(finding.key), finding_key=finding.key, section=finding.section, field=finding.field,
-            text=text, included=finding.status != 'not_found' and finding.routed_to == 'applicant',
+            text=text, included=(finding.status != 'not_found' and finding.routed_to == 'applicant'
+                                 and finding.key not in repeats),
             officer_check=finding.status == 'not_found', target=target(finding)))
     request = InformationRequest(intro=INTRO, items=items)
     request.text = render(request)

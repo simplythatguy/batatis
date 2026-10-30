@@ -62,8 +62,9 @@ export function requestedItemRow(c: Case, gaps: Gap[], item: MessageItem, saved:
 
   const fact = field ? [...c.facts].reverse().find((f) => localField(f.field) === field) : undefined;
   const answered = fact?.status === "confirmed" && fact.value != null && String(fact.value).trim() !== "";
-  // An absent custom/legacy gap alone is not evidence that its freeform instruction was met.
-  if (!answered && !checked) return { ...base, state: "review", status: "Review officer instruction", tone: "warning" };
+  // An absent custom/legacy gap alone is not evidence that its freeform instruction was met. The
+  // officer's own words are the instruction, so the row adds no status line of its own.
+  if (!answered && !checked) return { ...base, state: "review", status: "", tone: "warning" };
   if (!saved) return { ...base, state: "unsaved", status: "Save correction before resubmitting", tone: "pending" };
   return { ...base, state: "pending", status: "Awaiting officer confirmation", tone: "pending" };
 }

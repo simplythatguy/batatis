@@ -56,17 +56,39 @@ def _summary(session: ReviewSession, case=None, gaps=()) -> SessionSummary:
                           sent_at=session.information_request.sent_at if session.information_request.message_id else None)
 
 
+def same_round(last: ReviewSession | None, case) -> bool:
+    """The previous review belongs to the submission on screen and its request was never sent: a re-run
+    (after a determination, an edit, or "Review again") continues the officer's work instead of restarting it."""
+    if last is None or case is None or last.information_request.message_id:
+        return False
+    return not case.submitted_at or last.created_at >= case.submitted_at
+
+
+def carried(last: ReviewSession, findings, request):
+    """The officer's calls and own items from the previous review of the same submission. A call on a
+    finding that is gone is dropped; workspace.build still refuses a dismissal the rulebook requires."""
+    keys = {f.key for f in findings}
+    dispositions = [d for d in last.dispositions if d.key in keys]
+    own = [item for item in last.information_request.items if not item.finding_key]
+    if own:
+        request = request.model_copy(update={'items': [*request.items, *own], 'edited': True})
+    return dispositions, request
+
+
 def _build(package_id: str, case_id: str | None, authority: str, user: User, kind: str, parts: Parts,
-           previous: list[ReviewSession]) -> ReviewSession:
+           previous: list[ReviewSession], case=None) -> ReviewSession:
     last = previous[-1] if previous else None
     diff = ir.diff(last.version, last.findings, parts.findings, lookup_skipped=parts.lookup_skipped) if last else None
     findings = parts.findings + (ir.carry_unverified(last.findings, parts.findings, diff) if last and diff else [])
+    request, dispositions = ir.build(findings), []
+    if same_round(last, case):
+        dispositions, request = carried(last, findings, request)
     return workspace.sync_request(ReviewSession(
         package_id=package_id, case_id=case_id, authority=authority, version=(last.version if last else 0) + 1,
         created_at=now(), created_by_name=user.name, input_kind=kind, case_version=parts.case_version,
         files=parts.files, fields=parts.fields, findings=findings, documents=parts.documents,
-        citations=parts.citations, section_c=parts.section_c, information_request=ir.build(findings),
-        diff=diff, lookup_skipped=parts.lookup_skipped, policy=parts.policy))
+        citations=parts.citations, section_c=parts.section_c, information_request=request,
+        dispositions=dispositions, diff=diff, lookup_skipped=parts.lookup_skipped, policy=parts.policy))
 
 
 def rulebook_gaps(case, codes, store=None):
@@ -245,7 +267,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
             if current[1] != snapshot[1]:
                 raise HTTPException(409, 'case was updated concurrently')
             kind = 'case'
-        session = _build(case_id, case_id, case.authority, user, kind, parts, previous)
+        session = _build(case_id, case_id, case.authority, user, kind, parts, previous, case)
         gaps = await run_in_threadpool(rulebook_gaps, source_case, codes, cases())
         return await run_in_threadpool(save, session, gaps)
 

@@ -30,9 +30,10 @@ function officeLine(value: string) {
   return officeCovered(value) === false ? <p className="cf-pw-office"><Dot tone="warning" />Batatis prepares applications only for Calgary and Edmonton.</p> : null;
 }
 
-/** Edits and defaults belong to this sheet until the applicant presses Done. */
+/** Each row goes to the case as it changes, so the header's save state is the server's, never ahead of it. */
 export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; focusRow: string | null; onDone: () => void; extras?: ReturnType<typeof useDeckExtras>["extras"] }) {
   const { c, dispatch } = useCase();
+  // Only typed text keeps a local copy while its field has focus, so trimming never eats the space being typed.
   const [drafts, setDrafts] = useState<Record<string, RowDraft>>({});
   const root = useRef<HTMLFormElement>(null);
   const rows = item.paperworkRows ?? [];
@@ -45,32 +46,32 @@ export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; foc
   // A legal description read as lot, block and plan parts is shown joined, as the form writes it.
   const savedValue = (id: string) => cleanReadValue(valueText(factFor(c, id)))
     || (id === "legalDescription" ? legalFromFacts(c.facts) : "");
-  const answer = (key: string, value: string, defaulted = false) => setDrafts((draft) => ({ ...draft, [key]: { kind: "answer", value, defaulted } }));
 
-  function save() {
-    for (const row of rows) {
-      const draft = drafts[row.key];
-      if (!draft) continue;
-      for (const previous of journeyAnswers(c).values()) {
-        if (previous.stage === "paperwork" && (previous.field === row.ref || previous.field === fieldOf(row))) dispatch(clearJourneyAnswerAction({ ...row, key: previous.key }));
-      }
-      if (draft.kind !== "answer") {
-        if (row.kind === "authority") {
-          dispatch({ type: "setAuthority", authority: "" });
-          dispatch(officeChoiceAction("unsure"));
-        } else dispatch({ type: "setDetail", field: fieldOf(row), value: "", section: row.section });
-        dispatch(journeyAnswerAction(row, draft.kind));
-      } else {
-        dispatch(clearJourneyAnswerAction(row));
-        if (row.kind === "authority") {
-          dispatch({ type: "setAuthority", authority: draft.value });
-          dispatch(officeChoiceAction(draft.value));
-        } else dispatch({ type: "setDetail", field: fieldOf(row), value: draft.value.trim(), section: row.section });
-      }
+  /** Write one row to the case; the case autosaves it. */
+  function commit(row: DeckItem, draft: RowDraft) {
+    for (const previous of journeyAnswers(c).values()) {
+      if (previous.stage === "paperwork" && (previous.field === row.ref || previous.field === fieldOf(row))) dispatch(clearJourneyAnswerAction({ ...row, key: previous.key }));
     }
-    setDrafts({});
-    onDone();
+    if (draft.kind !== "answer") {
+      if (row.kind === "authority") {
+        dispatch({ type: "setAuthority", authority: "" });
+        dispatch(officeChoiceAction("unsure"));
+      } else dispatch({ type: "setDetail", field: fieldOf(row), value: "", section: row.section });
+      dispatch(journeyAnswerAction(row, draft.kind));
+    } else {
+      dispatch(clearJourneyAnswerAction(row));
+      if (row.kind === "authority") {
+        dispatch({ type: "setAuthority", authority: draft.value });
+        dispatch(officeChoiceAction(draft.value));
+      } else dispatch({ type: "setDetail", field: fieldOf(row), value: draft.value.trim(), section: row.section });
+    }
   }
+  const type = (row: DeckItem, value: string) => {
+    const draft: RowDraft = { kind: "answer", value };
+    setDrafts((all) => ({ ...all, [row.key]: draft }));
+    commit(row, draft);
+  };
+  const settle = (row: DeckItem) => setDrafts(({ [row.key]: _, ...rest }) => rest);
 
   const groupOf = (row: DeckItem) => GROUPS.findIndex((g) => g.fields.includes(row.kind === "authority" ? "authority" : fieldOf(row)));
   const grouped = GROUPS.map((g, n) => ({ ...g, rows: rows.filter((row) => (groupOf(row) < 0 ? GROUPS.length - 1 : groupOf(row)) === n) })).filter((g) => g.rows.length);
@@ -87,7 +88,7 @@ export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; foc
     const legacyRoles: Record<string, string> = { homebuilder: "Builder or contractor", builder: "Builder or contractor", "architect-engineer": "Architect or engineer" };
     const choiceLabel = choices.find((choice) => choice.value === value)?.label ?? (field === "applicant_role" ? legacyRoles[value] : undefined) ?? value.trim();
     const label = row.kind === "authority" ? "Office" : SHORT_LABEL[field] ?? row.title;
-    const choose = (picked: string, defaulted = false) => answer(row.key, picked, defaulted);
+    const choose = (picked: string, defaulted = false) => commit(row, { kind: "answer", value: picked, defaulted });
     const current = (id: string) => {
       const other = rows.find((r) => fieldOf(r) === id);
       const d = other ? drafts[other.key] : undefined;
@@ -116,18 +117,18 @@ export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; foc
             <div className="cf-pw-options">{choices.map((choice) => <button type="button" key={choice.value} className="cf-link-btn" aria-pressed={value === choice.value} onClick={(e) => { choose(choice.value); e.currentTarget.closest("details")?.removeAttribute("open"); }}>{choice.label}</button>)}</div>
           </details>
           : field === "date" ? <DatePicker id={row.key} label={label} value={value} onChange={choose} />
-            : <input id={row.key} type="text" className="cf-pw-input" aria-label={label} placeholder={placeholder} value={value} onChange={(e) => choose(e.target.value)} />}
+            : <input id={row.key} type="text" className="cf-pw-input" aria-label={label} placeholder={placeholder} value={value} onChange={(e) => type(row, e.target.value)} onBlur={() => settle(row)} />}
         {row.kind === "authority" && !deferred && officeLine(value)}
         {!value && !deferred && suggestions.length > 0 && <div className="cf-pw-suggest">{suggestions.map((s) => <button key={s.label} type="button" className="cf-link-btn" onClick={() => choose(s.value, true)}>{s.label}</button>)}</div>}
       </div>
       <span className="cf-pw-end">
         {fromFile ? <span className="cf-pw-source" title={fromFile}><Icon24 name="file" size={14} /><span className="cf-sr">From {fromFile}</span></span>
-          : !value && !deferred ? <button type="button" className="cf-link-btn cf-pw-later" aria-label={`Later: ${label}`} aria-pressed={deferred === "later"} onClick={() => setDrafts((d) => ({ ...d, [row.key]: { kind: "later" } }))}>Later</button> : null}
+          : !value && !deferred ? <button type="button" className="cf-link-btn cf-pw-later" aria-label={`Later: ${label}`} aria-pressed={deferred === "later"} onClick={() => commit(row, { kind: "later" })}>Later</button> : null}
       </span>
     </div>;
   }
 
-  return <form ref={root} className="cf-paperwork" aria-label="Last details for the form" onSubmit={(e) => { e.preventDefault(); save(); }}>
+  return <form ref={root} className="cf-paperwork" aria-label="Last details for the form" onSubmit={(e) => { e.preventDefault(); onDone(); }}>
     {grouped.map((g) => <section key={g.name} className="cf-pw-group" aria-label={g.name}>
       <h3 className="cf-pw-group-h">{g.name}</h3>
       {g.rows.map(renderRow)}

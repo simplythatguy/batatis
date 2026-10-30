@@ -29,8 +29,11 @@ type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
  * `isActive` tells a finished check whether anyone is still waiting for its result.
  */
 export function useApplicationExport(isActive: () => boolean = () => true, signatureNote = UNSIGNED_LINE) {
-  const { gaps, saveDraft, engineId, c, gapsSource, syncOk, reviewDetail, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkedAt } = useCase();
-  const { locked } = useCurrentApplication();
+  const { gaps, saveDraft, engineId, c, gapsSource, syncOk, reviewDetail, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkedAt, applicationStatus } = useCase();
+  const { locked, app } = useCurrentApplication();
+  // The officer accepted exactly this saved version, so its final PDF needs no fresh check here;
+  // the engine's export gate still decides.
+  const accepted = (app?.status ?? applicationStatus) === "accepted";
   const generation = engineGeneration();
   const abortRef = useRef<AbortController | null>(null);
   const recordAbortRef = useRef<AbortController | null>(null);
@@ -48,7 +51,7 @@ export function useApplicationExport(isActive: () => boolean = () => true, signa
   const exampleLabel = "Test fixture";
   const subject = "your draft";
   const blank = !c.description.trim() && c.facts.length === 0;
-  const officialReady = !c.exampleId && syncOk && ["ready", "needs_answers"].includes(checkStatus) && gapsSource === "engine" && blocking.length === 0;
+  const officialReady = !c.exampleId && (accepted || (syncOk && ["ready", "needs_answers"].includes(checkStatus) && gapsSource === "engine" && blocking.length === 0));
 
   function forgetFile() {
     setFile((current) => {
@@ -125,9 +128,9 @@ export function useApplicationExport(isActive: () => boolean = () => true, signa
     setStatusText(locked ? "Checking the saved application…" : `Saving ${subject}…`);
     // Locked PDFs are generated from the saved record. Official export refreshes the
     // read-only server check; drafts need no save or completeness preflight.
-    const caseId = locked ? draft ? engineId : await requestCheck(true) : await saveDraft();
+    const caseId = locked ? draft || accepted ? engineId : await requestCheck(true) : await saveDraft();
     if (ctl.signal.aborted) return;
-    if (!caseId || (!locked && !readSync().saved) || (!draft && (!readSync().reviewed || readGaps().some(g => g.severity === "blocking")))) {
+    if (!caseId || (!locked && !readSync().saved) || (!draft && !accepted && (!readSync().reviewed || readGaps().some(g => g.severity === "blocking")))) {
       const blocked = Boolean(caseId && readSync().reviewed && readGaps().some(g => g.severity === "blocking"));
       setStage(blocked ? "blocked" : "error");
       setTech(readSync().detail || reviewDetail);

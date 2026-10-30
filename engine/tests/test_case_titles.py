@@ -517,3 +517,10 @@ def test_rejected_database_write_is_not_reported_as_saved(context):
         else:
             with store._conn() as con:
                 con.execute('ALTER TABLE cases DROP CONSTRAINT reject_title')
+
+
+def test_a_named_building_kind_tells_two_subjects_apart():
+    from engine.identify.title import short_title
+    assert short_title("We're building a row house in Edmonton; each party wall will be a fire separation.", [], None) == 'Rowhouse fire separation'
+    assert short_title('A 3-storey office building in Calgary; the owner wants to leave out the sprinkler system.', [], None) == 'Office sprinklers'
+    assert short_title('A bungalow in Calgary needs an egress window.', [], None) == 'Egress window', 'a plain house adds nothing'

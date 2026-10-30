@@ -111,12 +111,12 @@ export const deck: Deck = {
       speaker: 2,
       slides: [
         { kind: "clip", id: "officer-queue", title: "The officer's inbox", src: "/studio/clips/c09-queue.mp4", from: 1.2, to: 9.6, rate: 1.5 },
-        { kind: "clip", id: "officer-review", title: "What's missing, at a glance", src: "/studio/clips/c10-officer-review.mp4", from: 0.3, to: 15.5, rate: 1.22 },
+        { kind: "clip", id: "officer-review", title: "What's missing, at a glance", src: "/studio/clips/c10-officer-review.mp4", from: 0.3, to: 15.5, rate: 1.09 },
         { kind: "clip", id: "officer-decide", title: "One clear message", src: "/studio/clips/c11-decide.mp4", from: 0.3, to: 11.5, rate: 1.5 },
       ],
       script: [
         "🙂 Now the other side. It lands in the Edmonton officer's inbox.",
-        "😌 The officer sees what's done and what's missing, and every citation opens the exact code sentence. Batatis checks completeness. Safety is still the officer's call.",
+        "😌 The officer sees what's done and what's missing. Batatis checks completeness; safety is still the officer's call. ⏸️ Each item shows its page and links the exact code.",
         "🙂 The officer sends it back with one clear message. The builder fixes it and resends.",
       ],
     },

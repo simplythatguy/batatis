@@ -93,6 +93,18 @@ export function officerVoice(message: string): string {
   return message.replace(/\bYour application\b/g, "The application").replace(/\byour application\b/g, "the application");
 }
 
+/**
+ * What the officer's row says. A question the drafting left open is named by the question itself, so five
+ * of them are five different rows; a relevance screen that never ran says so in plain words.
+ */
+export function officerFinding(f: Pick<Finding, "key" | "field" | "label" | "message" | "problem">): { title: string; note: string } {
+  if (f.key.startsWith("draft-question:") && f.message.trim()) return { title: f.message.trim(), note: "Open question from the drafted wording" };
+  if (f.field === "section_c.relevance" && f.problem === "lookup_skipped") {
+    return { title: sentence(f.label), note: "Batatis couldn’t check this one. Confirm it’s the right rule." };
+  }
+  return { title: sentence(f.label), note: officerVoice(f.message) };
+}
+
 export function findingView(f: Finding): FindingView {
   const p = f.pointers[0];
   return {
@@ -191,7 +203,11 @@ export interface Cell {
   where: string;
 }
 
-const cell = (label: string, a: Attribute): Cell => ({ label, value: a.known ? a.value : "unknown", known: a.known, where: a.known ? pointerLabel(a.source) : "" });
+// A blank form line ("_____") read by an earlier review is an empty field, not a value.
+const cell = (label: string, a: Attribute): Cell => {
+  const known = a.known && !/^[\s_.-]*$/.test(a.value);
+  return { label, value: known ? a.value : "unknown", known, where: known ? pointerLabel(a.source) : "" };
+};
 
 export function documentView(d: DocumentRow): { title: string; titleKnown: boolean; note: string; file: string | null; cells: Cell[] } {
   return {
