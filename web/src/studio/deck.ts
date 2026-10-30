@@ -24,7 +24,7 @@ export const deck: Deck = {
       ],
       script: [
         "🙂 Every new building idea in Alberta starts the same way. ⏸️ It breaks... a... RULE.",
-        "🙂 Here's a real example. The City of Edmonton lets rowhouses with basement suites use a one-hour party wall instead of a two-hour firewall.",
+        "🙂 Here's a real solution from the City of Edmonton. It lets rowhouses with basement suites use a one-hour party wall instead of a two-hour firewall.",
         "😮 Alberta recorded three hundred sixty-six variances on that one firewall rule in six months. ⏸️ That's TWO a day.",
       ],
     },
@@ -49,8 +49,8 @@ export const deck: Deck = {
         { kind: "count", id: "villain-cost", value: 3600, prefix: "$", label: "estimated cost of one extra round trip, in Canadian dollars, mostly waiting" },
       ],
       script: [
-        "😏 To ask for one, a builder fills in this form. Section C names the rule you're changing. ⏸️ Now watch. We delete it. 🤔 Would a first-time builder know what goes there?",
-        "😬 The officer would. And WEEKS later, the application comes back.",
+        "😏 A builder fills in this form. Section C names the rule you're changing. ⏸️ Now watch. We delete it. 🤔 Would a first-time builder know what goes there?",
+        "😬 The officer would. WEEKS later, the application comes back.",
         "😬 Every trip back costs about thirty-six hundred dollars, mostly waiting.",
       ],
     },
@@ -78,13 +78,13 @@ export const deck: Deck = {
       slides: [
         { kind: "clip", id: "apply-start", title: "Describe it. Drop it in.", src: "/studio/clips/c01-start.mp4", from: 1.8, to: 10.6, rate: 1.25 },
         { kind: "clip", id: "apply-read", title: "It reads both", src: "/studio/clips/c02-understood.mp4", from: 0.6, to: 11.0, rate: 1.6 },
-        { kind: "clip", id: "apply-rules", title: "The right rules, ranked", src: "/studio/clips/c03-rules.mp4", from: 0.4, to: 19.5, rate: 1.55 },
+        { kind: "clip", id: "apply-rules", title: "The right rules, ranked", src: "/studio/clips/c03-rules.mp4", from: 0.4, to: 18.2, rate: 1.55 },
         { kind: "clip", id: "apply-ask", title: "Only what's missing", src: "/studio/clips/c04-questions.mp4", from: 0.5, to: 9.0, rate: 1.3 },
       ],
       script: [
         "🙂 We describe the rowhouse in plain words and attach the form without Section C.",
         "🙂 Batatis reads both. It finds the site in Edmonton and every safety measure.",
-        "🙂 Then it ranks the rules that apply. ⏸️ 😮 At the TOP... the exact rule we deleted. 😄 Isn't that COOL? Ten times out of ten.",
+        "🙂 First, it names the rule this design breaks. ⏸️ 😮 EXACTLY the one we deleted. 😄 Isn't that COOL? Then come the rules it still follows.",
         "🙂 Next, it asks only what's still missing, one question at a time.",
       ],
     },
@@ -95,7 +95,7 @@ export const deck: Deck = {
       slides: [
         { kind: "clip", id: "apply-stop", title: "It doesn't guess", src: "/studio/clips/c05-engineer.mp4", from: 0.4, to: 16.5, rate: 1.35 },
         { kind: "clip", id: "apply-c", title: "Section C, looked up", src: "/studio/clips/c06-section-c.mp4", from: 3.4, to: 15.5, rate: 1.15 },
-        { kind: "clip", id: "apply-check", title: "Checked before it's sent", src: "/studio/clips/c07-check.mp4", from: 3.6, to: 18.5, rate: 1.4 },
+        { kind: "clip", id: "apply-check", title: "Checked before it's sent", src: "/studio/clips/c07-check.mp4", from: 3.6, to: 18.8, rate: 1.5 },
         { kind: "clip", id: "apply-form", title: "The official form", src: "/studio/clips/c08-form.mp4", from: 5.8, to: 18.0, rate: 1.6 },
       ],
       script: [
@@ -146,7 +146,7 @@ export const deck: Deck = {
         { kind: "count", id: "proof-cost", value: 1.23, prefix: "$", decimals: 2, label: "of AI per application, in Canadian dollars, averaged over 3 metered runs. The officer's review uses none." }
       ],
       script: [
-        "🤔 Does it REALLY work? We tested sixty-four real Alberta cases, like variances and appeals, with the rule numbers hidden.",
+        "🤔 Does it REALLY work? We tested sixty-four real Alberta cases, variances and appeals, rule numbers hidden.",
         "💪 Plain search ranked the right rule first TWENTY-SIX times. ⏸️ Batatis did it... FIFTY-FOUR... times.",
         "💪 And it never showed a made-up rule. ⏸️ ZERO.",
         "😌 Simulated first-time builders scored two out of ten with the official flowchart. With Batatis, FIVE POINT SIX.",
@@ -165,7 +165,7 @@ export const deck: Deck = {
         {
           kind: "flow", id: "scale-file", title: "A new city is one file",
           steps: [
-            { label: "One code database", sub: "13,743 provisions, NBC(AE) 2023" },
+            { label: "One code database", sub: "13,743 provisions" },
             { label: "One file per office", sub: "its forms and steps" },
             { label: "Same app", sub: "no code changes" },
           ],
@@ -174,7 +174,7 @@ export const deck: Deck = {
       ],
       script: [
         "🙂 Today we're live in Calgary and Edmonton. And we've mapped four hundred thirty-five places to their local office.",
-        "💪 Adding a city doesn't take new code. It takes one data file. Better AI won't earn an officer's trust. ⏸️ We... WILL.",
+        "💪 A new city takes one data file, not new code. Better AI won't earn an officer's trust. ⏸️ We... WILL.",
       ],
     },
     {
@@ -187,9 +187,9 @@ export const deck: Deck = {
         {
           kind: "flow", id: "honest-plan", title: "How we'll prove it",
           steps: [
-            { label: "Officers and applicants", sub: "real feedback" },
-            { label: "Real-world data", sub: "at a larger scale" },
-            { label: "Every number", sub: "measured again" },
+            { label: "Officers and applicants", sub: "their feedback" },
+            { label: "Real-world data", sub: "how Batatis performs" },
+            { label: "Larger scale", sub: "more offices" },
           ],
           active: [0, 1, 2],
         },
@@ -197,7 +197,7 @@ export const deck: Deck = {
       script: [
         "😌 Now, what we HAVEN'T proven. Our first-time builder scores are simulated, and ten times out of sixty-four the right rule wasn't first.",
         "😌 And no officer has reviewed a real Batatis application... YET.",
-        "💪 Once we can scale, phase one is feedback from safety codes officers and applicants, to see how Batatis performs on real-world data at a larger scale.",
+        "💪 Once we can scale, phase one is feedback from safety codes officers and applicants, to see how Batatis performs on real-world data, at scale.",
       ],
     },
     {
