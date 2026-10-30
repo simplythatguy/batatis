@@ -110,9 +110,9 @@ export const deck: Deck = {
       name: "Officer",
       speaker: 2,
       slides: [
-        { kind: "clip", id: "officer-queue", title: "The officer's inbox", src: "/studio/clips/c09-queue.mp4", from: 1.2, to: 9.6, rate: 1.5 },
-        { kind: "clip", id: "officer-review", title: "What's missing, at a glance", src: "/studio/clips/c10-officer-review.mp4", from: 0.3, to: 15.5, rate: 1.09 },
-        { kind: "clip", id: "officer-decide", title: "One clear message", src: "/studio/clips/c11-decide.mp4", from: 0.3, to: 11.5, rate: 1.5 },
+        { kind: "clip", id: "officer-queue", title: "The officer's inbox", src: "/studio/clips/c09-queue.mp4", from: 1.2, to: 9.8, rate: 1.55 },
+        { kind: "clip", id: "officer-review", title: "What's missing, at a glance", src: "/studio/clips/c10-officer-review.mp4", from: 0.3, to: 16.2, rate: 1.14 },
+        { kind: "clip", id: "officer-decide", title: "One clear message", src: "/studio/clips/c11-decide.mp4", from: 3.6, to: 16.0, rate: 1.65 },
       ],
       script: [
         "🙂 Now the other side. It lands in the Edmonton officer's inbox.",

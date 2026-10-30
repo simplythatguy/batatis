@@ -373,7 +373,7 @@
   },
   {
     "file": "c09-queue.mp4",
-    "seconds": 11.6,
+    "seconds": 11.9,
     "moments": [
       {
         "t": 0,
@@ -384,20 +384,20 @@
         "what": "Edmonton review queue"
       },
       {
-        "t": 1.8,
+        "t": 1.9,
         "what": "New: the submitted application"
       },
       {
-        "t": 6.7,
+        "t": 6.8,
         "what": "Pick up"
       },
       {
-        "t": 9,
+        "t": 9.1,
         "what": "the application opens for review"
       }
     ],
-    "bytes": 167827,
-    "shows": "Edmonton officer review queue: New shows the submitted Fire separation application from Dana Okafor; the officer picks it up and Batatis reads the package",
+    "bytes": 269214,
+    "shows": "Edmonton officer review queue: New shows the submitted Rowhouse fire separation application from Dana Okafor; the officer picks it up and Batatis reads the package",
     "pointerStart": [
       343,
       162
@@ -409,7 +409,7 @@
   },
   {
     "file": "c10-officer-review.mp4",
-    "seconds": 17.17,
+    "seconds": 18.8,
     "moments": [
       {
         "t": 0,
@@ -417,73 +417,81 @@
       },
       {
         "t": 0.5,
-        "what": "package review: Applicant (Section A) and Project (Section B) complete"
+        "what": "sections: Applicant (Section A) and Project (Section B) complete"
       },
       {
-        "t": 3.6,
-        "what": "Code references (Section C): 1 to ask; Case and proof (Section D): 5 to ask"
+        "t": 2.7,
+        "what": "Code references (Section C) 1 to ask; Case and proof (Section D) 10 to ask"
       },
       {
-        "t": 6.6,
-        "what": "what to ask the applicant: 3 things"
+        "t": 5,
+        "what": "a drafted question, shown as its own text"
       },
       {
-        "t": 8.5,
-        "what": "open question from the drafted wording"
+        "t": 6.8,
+        "what": "professional requirement: Decide"
       },
       {
-        "t": 10.1,
-        "what": "check: relevance of the cited provision"
+        "t": 9.9,
+        "what": "Section C: the form's one provision row; the rest folded under Also mentioned in the text"
       },
       {
-        "t": 12.9,
-        "what": "required: professional requirement, for the officer to decide"
+        "t": 14.9,
+        "what": "Section D: the attached study, linked once"
       }
     ],
-    "bytes": 236736,
-    "shows": "Officer package review: Applicant (A) and Project (B) complete, Code references (C) 1 to ask, Case and proof (D) 5 to ask; 3 things to ask, open questions from the drafted wording read as plain labels, relevance of the cited provision and the required professional-requirement determination routed to the officer",
+    "bytes": 1855773,
+    "shows": "Officer review: Applicant (A) and Project (B) complete, Code references (C) 1 to ask, Case and proof (D) 10 to ask; 6 things to ask, each drafted question shown as its own text; Decide on the professional-requirement row; in the application Section C shows the form's one provision row (Div B 9.10.11.2.(2)) with other mentions folded under Also mentioned in the text, and Section D links the attached City of Edmonton study once",
     "pointerStart": [
       204,
       138
     ],
     "pointerEnd": [
-      232,
-      664
+      635,
+      471
     ]
   },
   {
     "file": "c11-decide.mp4",
-    "seconds": 14.93,
+    "seconds": 19.9,
     "moments": [
       {
         "t": 0,
         "what": "start"
       },
       {
-        "t": 0.5,
-        "what": "decision: return to the applicant for the missing items"
+        "t": 0.4,
+        "what": "back to the review"
       },
       {
-        "t": 4.5,
-        "what": "the one-way message: items to provide; they fix it and resend, they can’t reply"
+        "t": 3.9,
+        "what": "decision: Return · 6 to the applicant"
       },
       {
-        "t": 8.3,
+        "t": 7.4,
+        "what": "the one-way message: each item is the plain question with its section (Section D)"
+      },
+      {
+        "t": 11.9,
+        "what": "they fix it and resend; they can’t reply"
+      },
+      {
+        "t": 13.5,
         "what": "Return"
       },
       {
-        "t": 10.4,
+        "t": 15.5,
         "what": "returned: waiting for the applicant"
       }
     ],
-    "bytes": 458513,
-    "shows": "Officer decision: Return to the applicant with a one-way message listing what to provide or confirm (completeness only, not a decision on the application); they fix it and resend, they can’t reply; the application shows Returned, waiting for Dana Okafor",
+    "bytes": 1988884,
+    "shows": "Officer decision: Return · 6 opens a one-way message to Dana Okafor (completeness only, not a decision on the application); each item is the plain question with its section, e.g. “(Section D)”; they fix it and resend, they can’t reply; after Return the application shows Returned, waiting for Dana Okafor, with the sent message",
     "pointerStart": [
-      232,
-      664
+      635,
+      471
     ],
     "pointerEnd": [
-      204,
+      214,
       230
     ]
   }
