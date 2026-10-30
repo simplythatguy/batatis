@@ -28,6 +28,8 @@ export function exportVideo(opts: {
   canvas?: HTMLCanvasElement;
   /** false leaves out the intro and outro cards, for one group on its own. */
   cards?: boolean;
+  /** Also play the sound out loud, so a render that is being watched is heard as it is made. */
+  monitor?: boolean;
 }): Promise<{ blob: Blob; mime: string }> {
   return renderVideo(opts);
 }

@@ -4,11 +4,11 @@ import { Icon } from "./icons";
 import { roomApi } from "./room";
 import { exportVideo, preload } from "./stage";
 import { takeCache } from "./takeCache";
-import { clock, INTRO_MS } from "./timing";
+import { clock, INTRO_MS, OUTRO_MS } from "./timing";
 import type { Deck, RoomState, TakeInfo, TakeMedia } from "./types";
 
 type State =
-  | { k: "working"; label: string; fraction: number }
+  | { k: "working"; label: string; fraction: number; leftMs?: number }
   | { k: "done"; url: string; mime: string; ms: number; poster: string }
   | { k: "failed"; message: string };
 
@@ -94,12 +94,15 @@ export function Render({ deck, room, onClose }: { deck: Deck; room: RoomState; o
           }, ctl.signal);
         }
         await preload(deck, (f) => setState({ k: "working", label: "Loading slides", fraction: f }));
+        // It renders in real time: what is left of the video is how long until Download.
+        const totalMs = INTRO_MS + infos.reduce((s, t) => s + t.durationMs, 0) + OUTRO_MS;
         const opts: Parameters<typeof exportVideo>[0] = {
           deck,
           takes: media,
           signal: ctl.signal,
           canvas: canvas.current ?? undefined,
-          onProgress: (fraction, label) => setState({ k: "working", label, fraction }),
+          monitor: true,
+          onProgress: (fraction, label) => setState({ k: "working", label, fraction, leftMs: (1 - fraction) * totalMs }),
         };
         const { blob, mime } = await exportVideo(opts);
         url = URL.createObjectURL(blob);
@@ -147,6 +150,7 @@ export function Render({ deck, room, onClose }: { deck: Deck; room: RoomState; o
                 <span className="st-meter" role="progressbar" aria-valuenow={Math.round(state.fraction * 100)} aria-valuemin={0} aria-valuemax={100}>
                   <span style={{ transform: `scaleX(${state.fraction})` }} />
                 </span>
+                {state.leftMs !== undefined && <span className="st-timer" aria-label={`${clock(state.leftMs)} left`}>{clock(state.leftMs)}</span>}
                 <button type="button" className="cf-btn" onClick={onClose}>Cancel</button>
               </>
             ) : (
