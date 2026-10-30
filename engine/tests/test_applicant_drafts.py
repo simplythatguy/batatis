@@ -278,20 +278,80 @@ def test_a_claim_that_breaks_a_rule_is_dropped_and_never_saved(app, change, bann
     assert [c[0] for c in connection.calls] == ['applicant_drafts', 'applicant_draft_audit']
 
 
-@pytest.mark.parametrize('change', [
-    lambda raw, ctx: raw['drafts'][0].update(text='Uncited extra prose.'),
-    lambda raw, ctx: raw['drafts'].pop(),
-    lambda raw, ctx: raw['drafts'][0].update(claims=[], questions=[]),
-])
-def test_a_malformed_batch_is_retried_and_never_saved(app, change):
+def test_a_malformed_batch_is_retried_and_never_saved(app):
     _, store, _, connection, _, case = app
-    connection.change = change
+    connection.change = lambda raw, ctx: raw['drafts'][0].update(text='Uncited extra prose.')
     response = run(app)
     assert response.status_code == 503, response.text
     assert 'no writing was saved' in response.json()['detail']
     assert store.get(case.id).drafting is None and store.get(case.id).version == case.version
     assert [c[0] for c in connection.calls] == ['applicant_drafts'] * GENERATION_ATTEMPTS
     assert connection.calls[1][2]['previous_attempt_rejected_because']
+
+
+def calls_for(connection, name):
+    return [c[2] for c in connection.calls if c[0] == name]
+
+
+@pytest.mark.parametrize('change', [
+    lambda raw, ctx: raw['drafts'].pop(),
+    lambda raw, ctx: raw['drafts'][-1].update(claims=[], questions=[]),
+    lambda raw, ctx: [part.update(sources=[{'source_id': code['id'], 'quote': code['text'][:100]}])
+                      for code in [next(s for s in ctx['sources'] if s['kind'] == 'code')]
+                      for part in [*raw['drafts'][-1]['claims'], *raw['drafts'][-1]['questions']]],
+])
+def test_a_field_that_never_passes_is_left_unwritten_and_the_rest_are_saved(app, change):
+    """A missing, empty or ungrounded field (cites only code) is written again alone; the others are kept."""
+    _, store, _, connection, _, case = app
+    connection.change = change
+    response = run(app)
+    assert response.status_code == 200, response.text
+    drafting = store.get(case.id).drafting
+    requested = calls_for(connection, 'applicant_drafts')
+    last = requested[0]['fields'][-1]
+    assert last == 'evidence_plan' and len(requested) == GENERATION_ATTEMPTS
+    assert all(r['fields'] == [last] and r['previous_attempt_rejected_because'] for r in requested[1:])
+    assert last in requested[1]['previous_attempt_rejected_because']
+    assert {d.field for d in drafting.drafts} == set(requested[0]['fields']) - {last}
+    assert any(n.startswith('Not drafted this time: Supporting evidence plan.') for n in drafting.notices)
+
+
+def test_a_field_that_fails_once_is_retried_alone_and_every_field_is_saved(app):
+    """The Calgary Part 3 failure: one field ungrounded per attempt used to discard every other field."""
+    _, store, _, connection, _, case = app
+    first = []
+
+    def unground_once(raw, ctx):
+        if not first:
+            first.append(ctx['fields'])
+            code = next(s for s in ctx['sources'] if s['kind'] == 'code')
+            for part in [*raw['drafts'][1]['claims'], *raw['drafts'][1]['questions']]:
+                part.update(sources=[{'source_id': code['id'], 'quote': code['text'][:100]}])
+    connection.change = unground_once
+    response = run(app)
+    assert response.status_code == 200, response.text
+    requested = calls_for(connection, 'applicant_drafts')
+    assert [r['fields'] for r in requested] == [first[0], [first[0][1]]]
+    assert 'must cite at least one description, fact or document source' in requested[1]['previous_attempt_rejected_because']
+    assert [c[0] for c in connection.calls] == ['applicant_drafts', 'applicant_draft_audit'] * 2
+    assert calls_for(connection, 'applicant_draft_audit')[1]['fields'] == [first[0][1]]
+    drafting = store.get(case.id).drafting
+    assert [d.field for d in drafting.drafts] == first[0]
+    assert not any(n.startswith('Not drafted this time') for n in drafting.notices)
+
+
+def test_the_article_of_a_confirmed_sentence_may_be_named_but_not_another_sentence(app):
+    _, store, _, connection, _, case = app
+
+    def name(raw, ctx):
+        field = next(d for d in raw['drafts'] if d['field'].startswith('section_c.'))
+        field['claims'][0]['text'] = 'Article 9.27.3.8. sets the benchmark for this junction.'
+        field['questions'][0]['text'] = 'Does Sentence 9.27.3.8.(4) also apply to the junction?'
+    connection.change = name
+    assert run(app).status_code == 200
+    assert '9.27.3.8' in calls_for(connection, 'applicant_drafts')[0]['allowed_articles']
+    writing = saved_writing(store, case)
+    assert 'Article 9.27.3.8. sets the benchmark' in writing and '9.27.3.8.(4)' not in writing
 
 
 def test_real_quote_does_not_make_unsupported_claim_grounded(app):

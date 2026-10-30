@@ -69,7 +69,7 @@ export function ReturnDecision({ app, decision, messageId }: { app: ApplicationS
               <li key={`${decision.items[index].gap_id ?? ""}:${decision.items[index].field ?? ""}:${index}`}>
                 <a href={r.href}>
                   <span className={`cf-dot is-${r.tone}`} aria-hidden="true" />
-                  <span className="cf-returned-item-text"><span>{r.label}</span><span className="cf-returned-item-state">{r.status}</span></span>
+                  <span className="cf-returned-item-text"><span>{r.label}</span>{r.status && <span className="cf-returned-item-state">{r.status}</span>}</span>
                   <Icon24 name="right" size={14} />
                 </a>
               </li>

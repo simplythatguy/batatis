@@ -1,6 +1,6 @@
 """The privacy notice. The same sentence lives in web/src/privacy.ts; a test keeps them identical."""
 
-PRIVACY_NOTICE = 'Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. It cannot remove them from pictures, so photos and scanned pages are sent only after you allow it. In live mode, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms; unsigned drafts expire after 7 inactive days, account drafts after 180 inactive days, and completed applications after 730 inactive days. Applications awaiting review or changes are kept until completed or deleted. Deleting an application removes its stored data, files and background work.'
+PRIVACY_NOTICE = 'Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. It cannot remove them from pictures, so photos and scanned pages are sent only after you allow it. When AI is on, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms; unsigned drafts expire after 7 inactive days, account drafts after 180 inactive days, and completed applications after 730 inactive days. Applications awaiting review or changes are kept until completed or deleted. Deleting an application removes its stored data, files and background work.'
 # The response header and the JSON meta notice are this same sentence.
 PII_NOTICE = PRIVACY_NOTICE
 
@@ -8,7 +8,7 @@ PII_NOTICE = PRIVACY_NOTICE
 def assistant_notice(provider: str = '') -> str:
     """The same wording for every provider: what is sent and how it is treated, never who runs the model."""
     return ('AI help explains information and administrative completeness; it does not determine technical correctness. '
-            'In live mode, your question, recent chat and selected application context (application facts and any selected case message) are sent to a third-party AI service provider in the United States and processed under its API data-use terms, after the names, contact details and addresses Batatis recognizes are removed. '
+            'When AI is on, your question, recent chat and selected application context (application facts and any selected case message) are sent to a third-party AI service provider in the United States and processed under its API data-use terms, after the names, contact details and addresses Batatis recognizes are removed. '
             'Batatis does not store this assistant chat; stored applications and '
             'their messages follow the application retention policy: unsigned drafts expire after 7 inactive days, '
             'account drafts after 180 inactive days, and completed applications after 730 inactive days. '

@@ -147,9 +147,11 @@ export function AppHeader({ title, onRename, renameDisabled, stages, right, onTo
               aria-label={label}
               aria-expanded={listOpen}
               onClick={onToggleList}
-              onPointerEnter={() => setTip(true)}
+              // A label for a mouse or the keyboard only: a tap on a phone must not leave it on screen.
+              onPointerEnter={(e) => setTip(e.pointerType === "mouse")}
               onPointerLeave={() => setTip(false)}
-              onFocus={() => setTip(true)}
+              onPointerDown={() => setTip(false)}
+              onFocus={(e) => setTip(e.currentTarget.matches(":focus-visible"))}
               onBlur={() => setTip(false)}
             >
               <Icon24 name="panel" size={18} />

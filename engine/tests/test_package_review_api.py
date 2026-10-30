@@ -680,3 +680,55 @@ def test_a_stuck_claim_keeps_the_original_error_is_hidden_and_expires(scene, mon
     sent = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
     assert sent.status_code == 200, sent.text
     assert len(clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests']) == 1
+
+
+def test_a_rerun_of_the_same_submission_keeps_the_officers_calls(scene):
+    store, clients, _ = scene
+    case = claimed(scene)
+    path = f'/review/{case.id}/package-review'
+    first = clients['reviewer'].post(path)
+    assert first.status_code == 201, first.text
+    index = clients['reviewer'].get(path).json()
+    free = [s['key'] for s in index['workspace']['states'] if not s['locked']]
+    assert free, 'the fixture needs at least one finding the officer may dismiss'
+    items = [{'id': i['id'], 'text': i['text'], 'included': i['included']} for i in first.json()['information_request']['items']]
+    items.append({'text': 'Please send the stamped drawing set.', 'included': True,
+                  'target': {'section': 'D', 'label': 'Section D · Drawing set'}})
+    edited = clients['reviewer'].put(f'{path}/1/information-request', json={
+        'items': items, 'findings': [{'key': free[0], 'state': 'dismissed', 'reason': 'checked'}]})
+    assert edited.status_code == 200, edited.text
+    # Any write to the case (a determination, a note) makes the review stale and the workspace runs it again.
+    store.put(store.get(case.id))
+    second = clients['reviewer'].post(path).json()
+    assert second['version'] == 2
+    assert {d['key']: d['reason'] for d in second['dispositions']} == {free[0]: 'checked'}
+    assert any(i['text'] == 'Please send the stamped drawing set.' and i['authored_by'] == 'officer'
+               for i in second['information_request']['items'])
+    states = {s['key']: s['state'] for s in clients['reviewer'].get(path).json()['workspace']['states']}
+    assert states[free[0]] == 'dismissed'
+    # Once the request went to the applicant, the next review starts fresh.
+    assert clients['reviewer'].post(f'{path}/2/information-request/send').status_code == 200
+    third = clients['reviewer'].post(path).json()
+    assert third['dispositions'] == []
+    assert not any(i['authored_by'] == 'officer' for i in third['information_request']['items'])
+    store.delete(case.id)
+
+
+def test_an_accepted_application_downloads_without_the_draft_mark(scene):
+    """App audit 2026-10-29, row 7: after acceptance the applicant was offered only the draft PDF."""
+    import io
+    from pypdf import PdfReader
+    from engine.export.signatures import DRAFT_MARK
+    store, clients, _ = scene
+    case = claimed(scene)
+    accepted = clients['reviewer'].post(f'/review/{case.id}/decision', json=acceptance_request(clients['reviewer'], case.id))
+    assert accepted.status_code == 200, accepted.text
+    assert store.get(case.id).status == 'accepted'
+    final = clients['owner'].post(f'/cases/{case.id}/export', json={'draft': False})
+    assert final.status_code == 200, final.text
+    assert '-DRAFT' not in final.headers['content-disposition']
+    pages = PdfReader(io.BytesIO(final.content)).pages
+    assert pages and all(DRAFT_MARK not in page.extract_text() for page in pages)
+    preview = clients['owner'].get(f'/cases/{case.id}/export/preview', params={'official': 'true', 'start': 0, 'count': 1})
+    assert preview.status_code == 200 and '-DRAFT' not in preview.json()['filename']
+    store.delete(case.id)

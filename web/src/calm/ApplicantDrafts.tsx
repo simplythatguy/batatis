@@ -187,7 +187,7 @@ export function ApplicantDrafts() {
     {busy && <p className="cf-draft-meta" role="status">{draftActivity.kind === "generating" ? "Writing your drafts. This can take a few minutes." : "Saving your decision…"}</p>}
     {reason && <p className="cf-draft-meta">{reason}</p>}
     {draftingError && <p className="cf-draft-error" role="alert">{draftingError}{!reason && <button type="button" className="cf-link-btn" disabled={disabled} onClick={() => { if (!disabled) void retryApplicantDrafts(); }}>Try again</button>}</p>}
-    {draftingStale && <p className="cf-draft-warning" role="status">Previous or unverified input · Generate fresh drafts before accepting or rejecting.</p>}
+    {draftingStale && <p className="cf-draft-warning" role="status">Written from older answers. Draft again before you accept it.</p>}
     {drafting?.notices.map((notice, i) => <p className="cf-draft-meta" key={i}>{notice}</p>)}
     {drafting && !drafts.length && <p role="status">No writing was returned. Review the generation notes, then try again.</p>}
     {choice && drafting && <>

@@ -36,7 +36,7 @@ import { CIcon } from "../ui";
 import type { IconName } from "../icons";
 import { Icon24 } from "../icons";
 import { StatusPill } from "./ReviewQueue";
-import { allAnchors, anchorFor, findingState, SECTIONS, sheetRows, sinceReturn, targetOptions, withThe, workspaceDecision } from "./workspaceView";
+import { allAnchors, anchorFor, findingState, localTally, SECTIONS, sheetRows, sinceReturn, targetOptions, withThe, workspaceDecision } from "./workspaceView";
 import "./review.css";
 
 type Snapshot = Awaited<ReturnType<typeof readReviewSnapshot>>;
@@ -341,10 +341,10 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const outcome = closeOut
     ? <CloseOutPanel c={closeOut} canRecord={canRecord} onChange={(next) => setIndex((previous) => (previous ? { ...previous, close_out: next } : previous))} />
     : null;
-  const professional = c && (
-    <ProfessionalRequirement c={c} editable={canReview && !draftPending && !historical} busy={Boolean(busy) || running || refreshing}
-      unresolved={professionalPending} onResolve={resolveProfessional} onEditingChange={setProfessionalEditing} />
-  );
+  const professionalProps = c && { c, editable: canReview && !draftPending && !historical, busy: Boolean(busy) || running || refreshing,
+    unresolved: professionalPending, onResolve: resolveProfessional, onEditingChange: setProfessionalEditing };
+  const professional = professionalProps && <ProfessionalRequirement {...professionalProps} />;
+  const determination = professionalProps && <ProfessionalRequirement {...professionalProps} inline />;
   const idle = !busy && !running && !draftPending;
   const menu = [
     ...(canReview ? [
@@ -458,7 +458,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
               historical={historical} status={status} messages={messages} onMessages={setMessages} me={me}
               messageDraft={messageDraft} onMessageDraft={setMessageDraft} onDraft={draftChanged} onSaved={adoptIndex}
               onConflict={() => refresh(true)} onReturn={() => openPreview("return")} onAccept={() => openPreview("accept")}
-              professional={professional} outcome={outcome} />
+              professional={professional} determination={determination} outcome={outcome} />
           ) : (
             <div className="rw-read">
               <ExpiryNotice expiresAt={c.expires_at} officer />
@@ -543,13 +543,13 @@ const SHEET_SECTIONS: { id: string; title: string; icon: IconName; parts: string
 ];
 
 /** The review of one version: one screen, with the application and the messages one step away. */
-function SessionWorkspace({ stage, onStage, c, snapshot, session, versions, workspace, target, applicant, editable, busy, showDecision, historical, status, messages, onMessages, me, messageDraft, onMessageDraft, onDraft, onSaved, onConflict, onReturn, onAccept, professional, outcome }: {
+function SessionWorkspace({ stage, onStage, c, snapshot, session, versions, workspace, target, applicant, editable, busy, showDecision, historical, status, messages, onMessages, me, messageDraft, onMessageDraft, onDraft, onSaved, onConflict, onReturn, onAccept, professional, determination, outcome }: {
   stage: Stage; onStage: (s: Stage) => void;
   c: Case; snapshot: Snapshot; session: ReviewSession; versions: SessionSummary[]; workspace: OfficerWorkspace | null; target: ReviewTarget; applicant: string;
   editable: boolean; busy: boolean; showDecision: boolean; historical: boolean; status: string;
   messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (v: string) => void;
   onDraft: (state: DraftReport) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void;
-  onReturn: () => void; onAccept: () => void; professional: ReactNode; outcome: ReactNode;
+  onReturn: () => void; onAccept: () => void; professional: ReactNode; determination: ReactNode; outcome: ReactNode;
 }) {
   const limits = workspace?.limits ?? READ_ONLY_LIMITS;
   const draft = useRequestDraft({ target, session, limits, enabled: editable, onSaved, onConflict });
@@ -586,8 +586,8 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, versions, work
   const dismissed = all.filter((r) => r.state.state === "dismissed");
   const rulebook = workspace?.rulebook ?? [];
 
-  const asked = workspace?.tally.asked ?? 0;
-  const required = workspace?.tally.required ?? 0;
+  // Counted from the calls on screen, so the headline and Return follow a ✕ at once, not after the save.
+  const { asked, required } = workspace ? localTally(session.findings, states, items, rulebook.length) : { asked: 0, required: 0 };
   const gate = workspaceDecision({ workspace, editable, pending: draft.pending, busy });
   // What the saved review says, steady through a save or a run; the gate only holds the buttons meanwhile.
   const ready = Boolean(workspace?.gate.can_accept);
@@ -712,7 +712,7 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, versions, work
       <div {...layer("review")}>
       <OfficerReview headline={headline} lede={lede} optional={ready} rows={decided || historical ? [] : active} rulebook={decided || historical ? [] : rulebook}
         dismissed={decided || historical ? [] : dismissed} own={decided || historical ? [] : own} caseId={c.id} files={session.files} editable={editable}
-        targets={targets} itemLimit={limits.item_text} sections={sections} actions={actions}
+        targets={targets} itemLimit={limits.item_text} sections={sections} actions={actions} determination={determination}
         extra={<>
           {problem && <p className="cf-faint cf-small ow-hint">{problem}</p>}
           {status === "returned" && session.information_request.text && <pre className="rw-letter ow-sent">{session.information_request.text}</pre>}

@@ -20,7 +20,7 @@
   border-radius: 0;
   background: transparent;
   color: var(--cf-text-3);
-  font: 500 12px var(--cf-mono);
+  font: 500 12px var(--cf-font);
   text-align: left;
   cursor: pointer;
   transition: color 150ms ease-out;

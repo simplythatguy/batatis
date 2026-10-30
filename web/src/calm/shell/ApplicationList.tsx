@@ -205,13 +205,18 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
       <label className="cf-list-search">
         <Icon24 name="search" size={15} />
         <span className="cf-sr">Search applications</span>
-        <input ref={search} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search applications" onKeyDown={(e) => { if (e.key === "Escape") { setQuery(""); e.currentTarget.blur(); } }} />
+        <input ref={search} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search applications" onKeyDown={(e) => {
+          if (e.key === "Escape") { setQuery(""); e.currentTarget.blur(); }
+          // Enter opens the top match, as the list shows it.
+          const top = [...pinned, ...active, ...settled][0];
+          if (e.key === "Enter" && query.trim() && top) { e.preventDefault(); onSelect(top.id); }
+        }} />
         <span className="cf-kbd is-dark" aria-hidden="true">{MOD_KEY} K</span>
       </label>
       <div className="cf-list-scroll" onScroll={hidePreview}>
         {note && <div className="cf-applist-note" role="status">{note}</div>}
         {error && <p className="cf-applist-note is-error" role="status">{error}</p>}
-        {loading && !items.length && <p className="cf-applist-note" role="status">Loading applications…</p>}
+        {loading && !items.length && !note && <p className="cf-applist-note" role="status">Loading applications…</p>}
         {!loading && !items.length && !error && (empty ?? <p className="cf-applist-note">No applications yet.</p>)}
         {query && nothing && items.length > 0 && <p className="cf-applist-note">Nothing matches “{query}”.</p>}
         {pinned.length > 0 && <ul className="cf-list-rows is-pinned" aria-label="Pinned">{pinned.map(row)}</ul>}

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { componentHarness, nodes, text } from "../../scripts/component-harness.mjs";
 import { draft, drafting } from "../../tests/applicant-drafts.fixture.ts";
-import { statementDrafts, statementReview } from "../applicantDrafts.ts";
+import { DRAFT_FAILED, statementDrafts, statementReview } from "../applicantDrafts.ts";
 import { emptyCase } from "../intake.ts";
 import { PROCESS_FACT, PROCESS_FIELDS } from "../model.ts";
 import type { Case } from "../types.ts";
@@ -122,15 +122,11 @@ test("before any draft the card offers to draft; while drafting it shows progres
   h.unmount();
 });
 
-test("the review screen replaces the six cards only while drafting can run", () => {
-  const record = { drafts: DRAFTS, stale: false };
-  assert.equal(statementReview({ phase: "signed-in", readOnly: false, drafting: null, error: "" }), true, "nothing drafted yet: offer to draft");
-  assert.equal(statementReview({ phase: "probing", readOnly: false, drafting: null, error: "" }), true, "no flicker while sign-in is checked");
-  assert.equal(statementReview({ phase: "signed-out", readOnly: false, drafting: null, error: "" }), false);
-  assert.equal(statementReview({ phase: "signed-in", readOnly: true, drafting: record, error: "" }), false);
-  assert.equal(statementReview({ phase: "signed-in", readOnly: false, drafting: null, error: "Drafting is unavailable." }), false, "a failed drafting request (offline, no provider) falls back");
-  assert.equal(statementReview({ phase: "signed-in", readOnly: false, drafting: record, error: "This statement was already answered." }), true, "a refused decision stays on the review");
-  assert.equal(statementReview({ phase: "signed-in", readOnly: false, drafting: { drafts: [], stale: false }, error: "" }), false, "nothing drafted for the statements");
+test("the review screen replaces the six cards whenever drafting can run, even after a failure", () => {
+  assert.equal(statementReview({ phase: "signed-in", readOnly: false }), true);
+  assert.equal(statementReview({ phase: "probing", readOnly: false }), true, "no flicker while sign-in is checked");
+  assert.equal(statementReview({ phase: "signed-out", readOnly: false }), false);
+  assert.equal(statementReview({ phase: "signed-in", readOnly: true }), false);
   const latest = statementDrafts({ drafts: [DRAFTS[0], { ...DRAFTS[0], id: "d-rationale-2" }] });
   assert.equal(latest.get("rationale")?.id, "d-rationale-2");
   assert.equal(latest.has("assumptions"), false);
@@ -188,5 +184,34 @@ test("a gap answer is added once, even after leaving the review and coming back"
   tree = await h.render();
   button(rows(tree)[1], "Add")[0].props.onClick();
   assert.equal(s.c.process.risk, "Risk assessment wording.\n\nA detached garage on the east lot.\n\ngarage");
+  h.unmount();
+});
+
+test("a failed Draft my case stays on the card with the button to try again", async () => {
+  const s = store();
+  s.drafting = null as unknown as typeof s.drafting;
+  s.draftingError = DRAFT_FAILED;
+  const h = await harness(s);
+  const tree = await h.render();
+  const alert = text(nodes(tree, (n) => n.props?.role === "alert")[0]);
+  assert.equal(alert, DRAFT_FAILED);
+  assert.doesNotMatch(alert, /Engine|503|grounding/);
+  button(tree, "Draft my case")[0].props.onClick();
+  assert.deepEqual(s.decisions, ["generate"]);
+  h.unmount();
+});
+
+test("statements a request left undrafted can be drafted again once nothing waits", async () => {
+  const s = store();
+  const h = await harness(s);
+  let tree = await h.render();
+  assert.equal(button(tree, "Draft again").length, 0, "Accept all comes first; drafting again would replace waiting drafts");
+  await button(tree, "Accept all")[0].props.onClick();
+  tree = await h.render();
+  button(tree, "Draft again")[0].props.onClick();
+  assert.equal(s.decisions.at(-1), "generate");
+  for (const p of PROCESS_FIELDS) s.c = { ...s.c, process: { ...s.c.process, [p.id]: s.c.process[p.id] || "Written." } };
+  tree = await h.render();
+  assert.equal(button(tree, "Draft again").length, 0, "nothing left to draft");
   h.unmount();
 });

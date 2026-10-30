@@ -22,7 +22,7 @@ export interface RequirementQueue {
   answered: RequirementRecord[];
   /** Division B requirements still waiting for an applicant decision. */
   reviewable: number;
-  /** Every Division B requirement the ledger discovered, decided or not. */
+  /** Every Division B requirement in the project's Part (see `inScope`) the ledger discovered, decided or not. */
   found: number;
 }
 
@@ -34,9 +34,37 @@ export function askable(record: RequirementRecord): boolean {
     && Boolean(record.provision_id) && !decided(record);
 }
 
+/**
+ * The building Part the project's own facts point to, from the engine's Part 9 entry check (Division A
+ * 1.3.3.3.(1)): 9 when the confirmed height and area are within Part 9's limits, 3 when either is over
+ * them, null while either is unknown. Occupancy stays with the applicant; this only narrows what is asked.
+ */
+export function projectPart(result: IdentifyResult | null | undefined): 3 | 9 | null {
+  const nine = result?.scope_assessments?.find((assessment) => assessment.part === 9);
+  if (!nine) return null;
+  const size = nine.conditions.filter((condition) => condition.field === "storeys" || condition.field === "building_area_m2");
+  if (nine.status === "boundary_not_met" || size.some((condition) => condition.status === "not_met")) return 3;
+  return size.length === 2 && size.every((condition) => condition.status === "met") ? 9 : null;
+}
+
+/** A row found by more than a word match: named in the description, chosen by a person, kept from before, or picked by the ranker. */
+const STRONG = new Set<RequirementRecord["discoveries"][number]["kind"]>(["explicit", "human", "previous", "model_search"]);
+
+/**
+ * Whether a ledger row belongs in the questions for this project. A Part 9 house is not asked about
+ * Part 3, 4, 6 or 7 rules (water slides, chlorine rooms, seismic isolation) on a word match alone, and
+ * a Part 3 building is not asked about Part 9. An answered row or a strong match always stays.
+ */
+export function inScope(record: RequirementRecord, part: 3 | 9 | null): boolean {
+  if (part === null || decided(record)) return true;
+  if (Number(record.provision_id?.split(".")[0]) === part) return true;
+  return record.discoveries.some((discovery) => STRONG.has(discovery.kind));
+}
+
 /** Ledger rows are already ordered by the engine's deterministic rank; the batch keeps that order. */
 export function requirementQueue(result: IdentifyResult | null | undefined, limit: number = REVIEW_BATCH): RequirementQueue {
-  const rows = (result?.requirements ?? []).filter((record) => record.division === "B" && record.source_status === "verified");
+  const part = projectPart(result);
+  const rows = (result?.requirements ?? []).filter((record) => record.division === "B" && record.source_status === "verified" && inScope(record, part));
   const waiting = rows.filter(askable);
   const answered = rows.filter((record) => Boolean(record.provision_id) && decided(record));
   return { batch: waiting.slice(0, limit), answered, reviewable: waiting.length, found: rows.length };

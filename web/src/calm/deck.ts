@@ -886,9 +886,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       section: "C",
       eyebrow: sectionEyebrow("C"),
       title: "Rules that may apply",
-      context: ledger.reviewable
-        ? `${ledger.found} rules mention what you described. ${ledger.reviewable} ${ledger.reviewable === 1 ? "is" : "are"} still unanswered; the closest ${ledger.batch.length} come next.`
-        : `You answered all ${ledger.found} rules that mention what you described.`,
+      // The ledger is a word search over the whole code: its size is not a count of rules that apply, so it is not shown.
+      context: ledger.reviewable ? `The ${ledger.batch.length} closest to your project come next.` : "You answered them all.",
       why: "Batatis finds rules by searching the code’s wording and the sections each one points to. A match means a rule mentions your project, not that your design differs from it. You decide whether each rule applies; the officer reviews that answer.",
       ref: "code-ledger",
       done: seen.has("code-ledger"),
@@ -981,7 +980,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const sheet: DeckItem = {
     key: "paperwork", kind: "paperwork", section: "A", stage: "paperwork", answerer: "you",
     eyebrow: "Paperwork", title: "Last details for the form", context: "",
-    why: "These details fill the form. Tap a default to accept it, or leave a row for Later. Done saves your answers.",
+    why: "These details fill the form. Tap a default to accept it, or leave a row for Later. Each answer saves as you go.",
     ref: "paperwork", optional: false, done: rowsForRoute.every((row) => row.done || row.optional),
     paperworkRows: rowsForRoute, counts,
   };

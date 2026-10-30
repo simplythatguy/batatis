@@ -215,3 +215,37 @@ test("one answer per rule: applicability never borrows the departure, and a reas
   })).batch[0];
   assert.equal(requirementDecision(conditional, "applies").role, "conditional");
 });
+
+const partNine = (storeys: "met" | "not_met" | "unknown", area: "met" | "not_met" | "unknown") => ({
+  part: 9, status: storeys === "not_met" || area === "not_met" ? "boundary_not_met" : "not_determined", limitation: "", basis: [],
+  conditions: [
+    { field: "storeys", status: storeys, values: [], fact_ids: [], explanation: "" },
+    { field: "building_area_m2", status: area, values: [], fact_ids: [], explanation: "" },
+    { field: "occupancy", status: "unknown", values: [], fact_ids: [], explanation: "" },
+  ],
+});
+
+test("a house within Part 9's limits is asked only about Part 9 rules; a bigger building only about Part 3", () => {
+  const rows = [
+    record({ id: "B:7.2.7.3.", provision_id: "7.2.7.3.", title: "Flume and Receiving Pool" }),
+    record({ id: "B:3.4.6.17.", provision_id: "3.4.6.17.", title: "Security for Banks" }),
+    record({ id: "B:9.10.11.2.", provision_id: "9.10.11.2." }),
+    record({ id: "B:4.1.8.19.", provision_id: "4.1.8.19.", title: "Seismic Isolation" }),
+    record({ id: "B:3.2.2.62.", provision_id: "3.2.2.62." }),
+    record({ id: "B:3.2.4.1.", provision_id: "3.2.4.1.", discoveries: [{ kind: "explicit", detail: "Named in the description.", evidence: null, evidence_id: null, evidence_ids: [], from_requirement: null, path: [] }] }),
+    record({ id: "B:3.2.5.7.", provision_id: "3.2.5.7.", disposition: "exclude", human_confirmed: true, confirmed_at: "2026-10-27T00:00:00Z" }),
+  ];
+  const ids = (q: ReturnType<typeof requirementQueue>) => [...q.answered, ...q.batch].map((r) => r.provision_id);
+  const house = requirementQueue(ledger({ requirements: rows, scope_assessments: [partNine("met", "met")] } as Partial<IdentifyResult>));
+  assert.deepEqual(ids(house), ["3.2.5.7.", "9.10.11.2.", "3.2.4.1."], "no pool, bank or seismic rule; an answered or named rule stays");
+  const office = requirementQueue(ledger({ requirements: rows, scope_assessments: [partNine("met", "not_met")] } as Partial<IdentifyResult>));
+  assert.deepEqual(ids(office), ["3.2.5.7.", "3.4.6.17.", "3.2.2.62.", "3.2.4.1."]);
+  const unknown = requirementQueue(ledger({ requirements: rows, scope_assessments: [partNine("met", "unknown")] } as Partial<IdentifyResult>));
+  assert.equal(unknown.found, rows.length, "an unknown size narrows nothing");
+});
+
+test("the rules card never prints the size of the word search", () => {
+  const deck = buildDeck(caseWith(), getGaps(caseWith()));
+  const summary = deck.find((i) => i.kind === "code-ledger")!;
+  assert.equal(summary.context, "The 6 closest to your project come next.");
+});

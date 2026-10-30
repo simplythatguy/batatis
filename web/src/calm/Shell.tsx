@@ -166,7 +166,7 @@ const remember = (id: string | null, owner?: string) => {
     else { sessionStorage.removeItem(OPEN_KEY); sessionStorage.removeItem(OPEN_OWNER_KEY); }
   } catch { /* storage unavailable */ }
 };
-const isPhone = () => window.matchMedia(PHONE).matches;
+const isPhone = () => typeof window.matchMedia === "function" && window.matchMedia(PHONE).matches;
 /** `#/review/<case id>` (not the PDF-package pages): the file a reviewer has open. */
 function reviewCaseOf(path: string): string | null {
   const m = /^\/review\/(.+)$/.exec(path);
@@ -547,7 +547,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         } else if (signedIn) startNew();
         else setConfirm(true);
       }}
-      loading={account.loadingList}
+      // Signed in, the list is loading until it has arrived once: never "no applications" before then.
+      loading={account.loadingList || (signedIn && account.applications === null && !account.listError)}
       error={account.listError}
       note={opening ? "Opening…" : listNote || (!signedIn && inCase ? "Saved for this visit only." : undefined)}
       empty={<p className="cf-applist-note">{empty ? "Describe what you’re building to start your first application." : "Your new application appears here once it starts."}</p>}
@@ -566,7 +567,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       renameDisabled={readOnly(current?.status)}
       stages={scope === "none" ? undefined : stages}
       onToggleList={toggleList}
-      listOpen={!listCollapsed}
+      listOpen={isPhone() ? sheet : !listCollapsed}
       toggleHint={`${MOD_KEY} B`}
       right={
         <>

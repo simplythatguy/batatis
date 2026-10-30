@@ -25,7 +25,8 @@ def test_the_return_letter_names_no_form_widget_and_no_doubled_article():
                     label='a named registered professional required for this work', status='missing',
                     problem='saved_constraint', message='The applicant has not named one.', routed_to='applicant')
     texts = [item.text for item in ir.build([signature, named]).items]
-    assert texts[0] == 'Please confirm that the application is signed and dated (Section A, page 2 of application.pdf).'
+    # The applicant answers by section; the package file and its pages are the officer's view (audit row 5).
+    assert texts[0] == 'Please confirm that the application is signed and dated (Section A).'
     assert texts[1].startswith('Please provide or confirm a named registered professional required for this work (Section D).')
     assert not any('Signature1' in text or 'the a ' in text for text in texts)
 

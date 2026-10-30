@@ -11,7 +11,8 @@ import { Icon24, type IconName } from "../icons";
 import { usePresence } from "../usePresence";
 import { CodeRef } from "./CodeRef";
 import { OpenFileLink } from "./OpenFileLink";
-import { officerVoice, sentence } from "./packageView";
+import { PROFESSIONAL_FIELD } from "./ProfessionalRequirement";
+import { officerFinding } from "./packageView";
 import type { DraftRequestItem } from "./requestDraft";
 import { TargetSelect } from "./TargetSelect";
 import { findingSources } from "./workspaceView";
@@ -42,16 +43,19 @@ function Evidence({ f, caseId, files }: { f: Finding; caseId: string; files: Inp
           : <span key={i} className="cf-cite is-static"><Icon24 name="file" size={14} />{s.chip}</span>)}
         {f.citations.map((c) => <CodeRef key={c} citation={c} />)}
       </div>
-      <p className="cf-faint cf-small">{officerVoice(f.message)}</p>
+      <p className="cf-faint cf-small">{officerFinding(f).note}</p>
     </div>
   );
 }
 
-export function FindingRow({ row, caseId, files, editable, onCall, onAddOwn }: {
+export function FindingRow({ row, caseId, files, editable, onCall, onAddOwn, action }: {
   row: Row; caseId: string; files: InputFile[]; editable: boolean;
   onCall: (edit: DispositionEdit) => void; onAddOwn: (f: Finding) => void;
+  /** The officer settles this row themselves (the professional requirement): their control replaces Ask. */
+  action?: ReactNode;
 }) {
   const { finding: f, state } = row;
+  const title = officerFinding(f).title;
   const [open, setOpen] = useState(false);
   const [why, setWhy] = useState(false);
   const ev = useRef<HTMLDivElement>(null);
@@ -72,10 +76,11 @@ export function FindingRow({ row, caseId, files, editable, onCall, onAddOwn }: {
       <span className={`cf-dot is-${tone}${verify ? " is-ring" : ""}`} aria-hidden="true" />
       <button type="button" className="cf-row-text ow-row-t" aria-expanded={open} onClick={() => setOpen(!open)}
         title={verify ? "Couldn’t be read · look first" : undefined}>
-        {sentence(f.label)}
+        {title}
         <span className="cf-sr">{f.severity === "blocking" ? ", required" : ", to check"}{verify ? ", look first" : ""}</span>
       </button>
-      {editable && verify && (
+      {action}
+      {editable && verify && !action && (
         <button type="button" className="cf-row-go" onClick={() => (row.askable ? onCall({ key: f.key, state: "ask", reason: null, note: "" }) : onAddOwn(f))}>
           Ask <CIcon name="plus" size={13} />
         </button>
@@ -83,7 +88,7 @@ export function FindingRow({ row, caseId, files, editable, onCall, onAddOwn }: {
       {editable && (state.locked ? (
         <span className="cf-faint cf-small" title="The completeness rules require it">Required</span>
       ) : (
-        <button ref={x} type="button" className="cf-icon-btn is-plain ow-x" aria-label={`Don’t ask for ${f.label}`} title="Don’t ask"
+        <button ref={x} type="button" className="cf-icon-btn is-plain ow-x" aria-label={`Don’t ask for ${title}`} title="Don’t ask"
           aria-expanded={f.severity === "blocking" ? why : undefined} onClick={() => (why ? cancel() : drop())}>
           <CIcon name="close" size={14} />
         </button>
@@ -132,7 +137,7 @@ function OwnItem({ item, targets, limits, onText, onTarget, onRemove }: {
 export interface SectionRow { id: string; title: string; icon: IconName; summary: string; tone: "blocking" | "warning" | "pending" | "done" | null }
 
 export function OfficerReview({ headline, lede, optional, rows, rulebook, dismissed, own, caseId, files, editable, targets, itemLimit, sections, actions,
-  extra, onCall, onAddOwn, onAdd, onOwnText, onOwnTarget, onOwnRemove, onSection }: {
+  determination, extra, onCall, onAddOwn, onAdd, onOwnText, onOwnTarget, onOwnRemove, onSection }: {
   headline: string;
   lede: ReactNode;
   /** The file is complete; the list holds only what the officer may choose to ask. */
@@ -149,7 +154,9 @@ export function OfficerReview({ headline, lede, optional, rows, rulebook, dismis
   sections: SectionRow[];
   /** The main action and its neighbour, or the outcome once decided. */
   actions: ReactNode;
-  /** Under the list: the close-out, the sent request, a determination. */
+  /** The professional-requirement control, shown on the row it settles. */
+  determination?: ReactNode;
+  /** Under the list: the close-out, the sent request. */
   extra?: ReactNode;
   onCall: (edit: DispositionEdit) => void;
   onAddOwn: (f: Finding) => void;
@@ -197,12 +204,14 @@ export function OfficerReview({ headline, lede, optional, rows, rulebook, dismis
           <ul className="cf-rows ow-ask" aria-label={optional ? "You could ask" : "To ask"}>
             {rows.map((r, i) => (
               <FindingRow key={r.finding.key} row={r} caseId={caseId} files={files} editable={editable}
+                action={r.finding.field === PROFESSIONAL_FIELD ? determination : undefined}
                 onCall={(edit) => { ask(i); onCall(edit); }} onAddOwn={(f) => { setAim({ kind: "own" }); onAddOwn(f); }} />
             ))}
             {rulebook.map((g) => (
               <li key={g.id} className="cf-row ow-row">
                 <Dot tone="blocking" />
                 <span className="cf-row-text">{g.message}</span>
+                {g.field === PROFESSIONAL_FIELD && determination}
                 <span className="cf-faint cf-small">Required</span>
               </li>
             ))}
@@ -224,7 +233,7 @@ export function OfficerReview({ headline, lede, optional, rows, rulebook, dismis
               {dismissed.map((r, j) => (
                 <li key={r.finding.key} className="cf-row ow-row is-quiet">
                   <Dot tone="pending" />
-                  <span className="cf-row-text">{sentence(r.finding.label)}
+                  <span className="cf-row-text">{officerFinding(r.finding).title}
                     <span className="cf-faint cf-small"> · {DISMISS_REASONS.find((x) => x.id === r.state.reason)?.label ?? "Not asking"}</span>
                   </span>
                   {editable && !r.state.locked && (

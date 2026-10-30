@@ -32,7 +32,8 @@ export interface SheetView {
   references: SheetRef[];
   process: SheetRow[];
   supporting: SheetRow[];
-  documents: { id: string; title: string; fileId: string | null; fileName: string | null; type: string | null; author: string | null; date: string | null }[];
+  /** One per document: a study listed once per objective it covers shows once; `ids` holds every listing. */
+  documents: { id: string; ids: string[]; title: string; fileId: string | null; fileName: string | null; type: string | null; author: string | null; date: string | null }[];
   questions: ReviewQuestion[];
 }
 
@@ -107,6 +108,7 @@ export function sheetFromEngine(c: EngineCase, information?: InformationRequest 
     const m = /^evidence\.([^.]+)\.title$/.exec(f.field);
     if (m && typeof f.value === "string" && f.value.trim()) docs.set(m[1], f.value.trim());
   }
+  const documents = listedDocuments(facts, docs);
   const references = (c.section_c ?? []).map((r) => {
     const objectives = [...new Set(r.pairs.map((p) => p.objective).filter(Boolean))];
     const functions = [...new Set(r.pairs.map((p) => p.function).filter(Boolean))];
@@ -128,13 +130,25 @@ export function sheetFromEngine(c: EngineCase, information?: InformationRequest 
     supporting: [
       row(facts, "Registered professional", [professionalField], true),
       row(facts, "Registration or seal", [registrationField], false),
-      { field: "documents", label: "Documents listed", value: docs.size ? `${docs.size} ${docs.size === 1 ? "document" : "documents"}` : null, required: true },
+      { field: "documents", label: "Documents listed", value: documents.length ? `${documents.length} ${documents.length === 1 ? "document" : "documents"}` : null, required: true },
     ],
-    documents: [...docs].map(([id, title]) => {
-      const binding = evidenceBinding(facts, id);
-      const metadata = (field: string) => text(latest(facts, [`evidence.${id}.${field}`]));
-      return { id, title, fileId: binding?.fileId ?? null, fileName: binding?.name ?? null,
-        type: metadata("evidence_type"), author: metadata("responsible_party"), date: metadata("date") };
-    }),
+    documents,
   };
+}
+
+const same = (s: string | null) => (s ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+
+function listedDocuments(facts: Fact[], docs: Map<string, string>): SheetView["documents"] {
+  const out = new Map<string, SheetView["documents"][number]>();
+  for (const [id, title] of docs) {
+    const binding = evidenceBinding(facts, id);
+    const metadata = (field: string) => text(latest(facts, [`evidence.${id}.${field}`]));
+    const doc = { id, ids: [id], title, fileId: binding?.fileId ?? null, fileName: binding?.name ?? null,
+      type: metadata("evidence_type"), author: metadata("responsible_party"), date: metadata("date") };
+    const key = JSON.stringify([same(title), same(doc.author), same(doc.date)]);
+    const first = out.get(key);
+    if (first) { first.ids.push(id); first.fileId ??= doc.fileId; first.fileName ??= doc.fileName; }
+    else out.set(key, doc);
+  }
+  return [...out.values()];
 }

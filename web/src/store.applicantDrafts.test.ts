@@ -287,6 +287,19 @@ test("case/account replacement drops late output and a changed revision during p
   p.h.unmount();
 });
 
+test("a failed generation reads in plain words and Try again sends the request again", async () => {
+  const p = await provider();
+  p.fail(new EngineError(503, "Drafting unavailable: generation or grounding validation failed; no writing was saved."));
+  await (await p.store()).generateApplicantDrafts();
+  assert.equal((await p.store()).draftingError, "We couldn't draft this part. Try again.");
+  p.fail(null);
+  const before = p.writes.filter(w => w.kind === "generate").length;
+  await (await p.store()).retryApplicantDrafts();
+  assert.equal(p.writes.filter(w => w.kind === "generate").length, before + 1);
+  assert.equal((await p.store()).draftingError, "");
+  p.h.unmount();
+});
+
 test("a conflict waits for the save-conflict review, gone cases stay gone, and submitted cases refuse generation", async () => {
   const p = await provider();
   p.fail(new EngineError(409, "updated concurrently"));

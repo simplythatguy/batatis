@@ -8,7 +8,9 @@ import type { SheetRow, SheetView } from "./sheet";
 export type Section = Finding["section"];
 export type FindingFilter = "all" | "required" | "to_check" | "dismissed";
 export const SECTIONS: Section[] = ["A", "B", "C", "process", "D"];
-export interface SheetAnchor { id: string; section: Section; field: string; label: string }
+export interface SheetAnchor { id: string; section: Section; field: string; label: string;
+  /** A document listed more than once: every listing's evidence id points here. */
+  ids?: string[] }
 export interface WorkspaceRow extends SheetAnchor { reading: SheetRow }
 
 export function sheetRows(sheet: SheetView, session: ReviewSession | null, historical = false): WorkspaceRow[] {
@@ -37,11 +39,12 @@ export function sheetRows(sheet: SheetView, session: ReviewSession | null, histo
 
 export function allAnchors(rows: WorkspaceRow[], sheet: SheetView, session: ReviewSession | null): SheetAnchor[] {
   const refs = [...new Set([...sheet.references.map(r => r.provision), ...(session?.citations ?? []).map(c => c.provision_id || c.text), ...(session?.section_c ?? []).map(c => c.provision_id).filter((p): p is string => Boolean(p))])];
-  const docs = new Map(sheet.documents.map(d => [d.id, d.title]));
-  for (const d of session?.documents ?? []) if (!docs.has(d.id)) docs.set(d.id, d.title.known ? d.title.value : "Untitled document");
+  const docs = new Map(sheet.documents.map(d => [d.id, { title: d.title, ids: d.ids }]));
+  const listed = new Set(sheet.documents.flatMap(d => d.ids));
+  for (const d of session?.documents ?? []) if (!listed.has(d.id)) { listed.add(d.id); docs.set(d.id, { title: d.title.known ? d.title.value : "Untitled document", ids: [d.id] }); }
   return [...rows,
     ...refs.map<SheetAnchor>(provision => ({ id: `C:${provision}`, section: "C" satisfies Section, field: `section_c.${provision}`, label: provision })),
-    ...[...docs].map<SheetAnchor>(([id, title]) => ({ id: `D:document:${id}`, section: "D" satisfies Section, field: `evidence.${id}`, label: title })),
+    ...[...docs].map<SheetAnchor>(([id, d]) => ({ id: `D:document:${id}`, section: "D" satisfies Section, field: `evidence.${id}`, label: d.title, ids: d.ids })),
     { id: "process:file-checklist", section: "process", field: "div_c", label: "File checklist" },
   ];
 }
@@ -55,7 +58,7 @@ export function anchorFor(item: { section: Section | null; field: string | null 
   if (exact) return exact.id;
   if (/^(evidence|document|section_d)\./.test(field)) {
     const id = field.split(".")[1];
-    const doc = rows.find(r => r.section === "D" && r.field === `evidence.${id}`);
+    const doc = rows.find(r => r.section === "D" && (r.field === `evidence.${id}` || r.ids?.includes(id)));
     if (doc) return doc.id;
   }
   if (/^(section_c|citation)[.\[]/.test(field)) {
@@ -148,6 +151,19 @@ export function workspaceDecision({ workspace, editable, pending, busy }: { work
   const returnReason = hold || (!workspace ? "Waiting for the saved review." : !workspace.tally.asked ? "Add an item to return the application." : "");
   const acceptReason = hold || (!workspace ? "Waiting for the saved review." : workspace.gate.reason);
   return { canReturn: !returnReason, canAccept: !hold && Boolean(workspace?.gate.can_accept), canRefuse: editable && !pending && !busy, returnReason, acceptReason };
+}
+
+/**
+ * The headline's counts as the officer's own calls make them, without waiting for the save: the same rules
+ * as the server's tally (engine/review/workspace.py). Acceptance still waits for the server's gate.
+ */
+export function localTally(findings: Finding[], states: Map<string, Pick<FindingState, "state" | "locked">>,
+  items: { finding_key?: string | null; included: boolean; text: string }[], rulebook: number) {
+  const open = (key: string) => states.has(key) && states.get(key)!.state !== "dismissed";
+  return {
+    required: findings.filter(f => f.key !== "peer_review:signal" && open(f.key) && (f.severity === "blocking" || states.get(f.key)!.locked)).length + rulebook,
+    asked: items.filter(i => (i.finding_key ? states.get(i.finding_key)?.state === "ask" : i.included && i.text.trim().length > 0)).length,
+  };
 }
 
 /** "the professional", never "the a professional". */

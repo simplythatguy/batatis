@@ -16,7 +16,7 @@ import { useRelevance } from "./useRelevance";
 import { Icon24, type IconName } from "./icons";
 import { CIcon, CompletenessNote, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
 import { confirmedProvisions } from "../provisions";
-import { preparationGaps } from "./preparation";
+import { preparationGaps, sectionTone } from "./preparation";
 import { ApplicantDrafts } from "./ApplicantDrafts";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -44,12 +44,6 @@ export function EngineerCallout({ c, gaps, readOnly = false }: { c: Case; gaps: 
       {!readOnly && <a className="cf-engineer-link" href={officerPending ? "#/application" : "#/questions?focus=section-d"}>{officerPending ? "Preview and submit" : "Open your case and proof"} <CIcon name="arrow" size={13} /></a>}
     </section>
   );
-}
-
-function worst(gaps: Gap[]): DotTone {
-  if (gaps.some((g) => g.severity === "blocking")) return "blocking";
-  if (gaps.length) return "warning";
-  return "done";
 }
 
 /** One neutral icon per official section; the label beside it stays the Section A–D name. */
@@ -195,8 +189,9 @@ function CaseReview() {
   } else if (!checked) {
     headline = "Let’s check your application.";
   } else if (applicantComplete) {
-    headline = "Ready to submit for review.";
-    lede = "Your required answers are in. The officer must determine the professional requirement; official PDF and administrative acceptance stay on hold.";
+    // Open questions are still the applicant's to look at; the headline says so instead of a bare "Ready".
+    headline = work.applicant.length ? `Ready to submit. ${plural(work.applicant.length, "open question")} to look at first.` : "Ready to submit for review.";
+    lede = "Your required answers are in. The officer decides whether an engineer is required.";
   } else if (applicantBlocking.length) {
     headline = `Almost there. ${plural(applicantBlocking.length, "thing")} ${applicantBlocking.length === 1 ? "stands" : "stand"} between you and submission.`;
   } else if (warnings) {
@@ -272,7 +267,7 @@ function CaseReview() {
             // An empty Section C is not complete: no reference has been confirmed yet.
             const sectionWork = preparationGaps(c, s.gaps);
             const officerOnly = s.gaps.length > 0 && sectionWork.officer.length === s.gaps.length;
-            const tone: DotTone = readOnly && !checked ? "pending" : officerOnly ? "warning" : "empty" in s && s.empty && !s.gaps.length ? "pending" : worst(s.gaps);
+            const tone: DotTone = readOnly && !checked ? "pending" : officerOnly ? "warning" : "empty" in s && s.empty && !s.gaps.length ? "pending" : sectionTone(c, s.gaps);
             const engineer = s.letter === "D" && need;
             const summary = readOnly && !checked ? "Check the saved application" : s.letter === "C" ? `${s.ok}${s.gaps.length ? ` · ${plural(s.gaps.length, "unresolved item")}` : ""}` : sectionWork.checkNeeded.length && !sectionWork.applicant.length ? "Check your changed application" : officerOnly ? "Officer determination pending" : s.gaps.length
               ? `${engineer ? `${engineer.summary} · ` : ""}${plural(s.gaps.length, "item")} left`

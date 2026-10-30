@@ -15,3 +15,13 @@ export function preparationGaps(c: Case, gaps: Gap[]): { applicant: Gap[]; offic
   }
   return out;
 }
+
+/**
+ * A section's dot as the applicant sees it: red only while the applicant (or a fresh check) still owes a
+ * required item. What waits on the officer, such as the professional requirement, is amber, never red.
+ */
+export function sectionTone(c: Case, gaps: Gap[]): "blocking" | "warning" | "done" {
+  const work = preparationGaps(c, gaps);
+  if ([...work.applicant, ...work.checkNeeded].some((g) => g.severity === "blocking")) return "blocking";
+  return gaps.length ? "warning" : "done";
+}

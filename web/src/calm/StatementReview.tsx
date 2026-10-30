@@ -40,6 +40,8 @@ export function StatementReview() {
   const busy = draftActivity.kind !== "idle" || running;
   const pending = PROCESS_FIELDS.flatMap((p) => { const d = waiting(drafts.get(p.id), c.process[p.id]); return d ? [d] : []; });
   const open = PROCESS_FIELDS.filter((p) => !c.process[p.id].trim()).length;
+  // A request that drafted only some statements leaves the rest open with nothing to review.
+  const undrafted = PROCESS_FIELDS.some((p) => !c.process[p.id].trim() && !drafts.has(p.id));
   const canDecide = !locked && !busy && !draftingStale;
   // Typing any statement changes what the drafts were written from, so every pending draft would go stale.
   const held = (pending.length > 0 && !draftingStale) || busy;
@@ -68,7 +70,8 @@ export function StatementReview() {
   const primary = drafts.size === 0 && !generating && open > 0 ? { label: "Draft my case", icon: true, act: () => void generateApplicantDrafts(), off: locked || busy || !c.description.trim() }
     : draftingStale && open > 0 && !generating ? { label: "Draft again", icon: true, act: () => void generateApplicantDrafts(), off: locked || busy }
       : pending.length > 0 ? { label: "Accept all", icon: false, act: () => void acceptAll(), off: !canDecide }
-        : null;
+        : undrafted && !generating ? { label: "Draft again", icon: true, act: () => void generateApplicantDrafts(), off: locked || busy }
+          : null;
 
   return <div className="cf-statements" aria-busy={busy}>
     <ul className="cf-statement-list">{PROCESS_FIELDS.map((p) => {

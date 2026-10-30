@@ -218,7 +218,7 @@ class CCMCRegistry:
                 raise OSError('offline mode')
             parsed = self._parse(self._live())
             self._source, self._registry_date = 'live', self.today().isoformat()
-            self._notice = 'Searched the public CCMC JSON registry. Report applicability needs review.'
+            self._notice = 'Checked the national product evaluation registry. Check that each report covers how you use the product.'
         except (OSError, ValueError, TypeError, KeyError) as error:
             try:
                 parsed = self._parse(json.loads(self.snapshot_path.read_text(encoding='utf-8')))
@@ -226,8 +226,8 @@ class CCMCRegistry:
                 raise RegistryUnavailable('Live CCMC registry and a complete offline snapshot are unavailable; '
                                           'no negative search conclusion can be made.') from fallback
             self._source, self._registry_date = 'snapshot', self.snapshot_date
-            self._notice = (f'Using offline snapshot dated {self.snapshot_date}; live registry unavailable '
-                            f'({type(error).__name__}). Current status and report dates are unverified.')
+            self._notice = (f'Used a saved copy of the registry from {self.snapshot_date}; the live registry did not answer. '
+                            'Listing status and report dates may be out of date.')
         self._items = parsed
         self._dates.clear()
         self._loaded_at = self.clock()

@@ -4,7 +4,7 @@ import { componentHarness, nodes, text } from "../../scripts/component-harness.m
 import * as filter from "./authorityFilter.ts";
 import * as config from "../config.ts";
 
-test("search picks a supported office, and keeps any other place as typed", async () => {
+test("search picks a supported office, and never picks another place", async () => {
   const picks: string[] = [];
   const h = await componentHarness(new URL("./AuthorityPicker.tsx", import.meta.url), "AuthorityPicker", { "./authorityFilter": filter, "../config": config });
   const props = { options: config.AUTHORITIES, value: "", label: "Office", onPick: (value: string) => picks.push(value) };
@@ -18,7 +18,7 @@ test("search picks a supported office, and keeps any other place as typed", asyn
   input().props.onChange({ target: { value: "Example Hamlet" } });
   tree = await h.render(props);
   input().props.onKeyDown({ key: "Enter", preventDefault() {} });
-  assert.deepEqual(picks, ["edmonton", "Example Hamlet"]);
+  assert.deepEqual(picks, ["edmonton"], "Enter on another place picks nothing, not even Not sure");
   h.unmount();
 });
 
@@ -36,7 +36,7 @@ test("the site place confirms in one tap and Not sure is a deliberate choice", a
   h.unmount();
 });
 
-test("a supported office typed another way is listed once, and any other name is offered as typed", async () => {
+test("a supported office typed another way is listed once, and any other place says at once it is not covered", async () => {
   const h = await componentHarness(new URL("./AuthorityPicker.tsx", import.meta.url), "AuthorityPicker", { "./authorityFilter": filter, "../config": config });
   const props = { options: config.AUTHORITIES, value: "", label: "Office", onPick: () => {} };
   let tree = await h.render(props);
@@ -50,10 +50,13 @@ test("a supported office typed another way is listed once, and any other name is
   }
   input().props.onChange({ target: { value: "Red Deer" } });
   tree = await h.render(props);
-  assert.deepEqual(options(), ["Red Deer", "Not sure"]);
+  assert.deepEqual(options(), ["Not sure"]);
+  const note = () => nodes(tree, (node) => node.type === "li" && node.props?.role === "presentation").map((node) => text(node));
+  assert.deepEqual(note(), ["Batatis prepares applications only for Calgary and Edmonton."]);
   // The paperwork form's field offers only offices; its row has Later instead of Not sure.
   tree = await h.render({ ...props, compact: true });
-  assert.deepEqual(options(), ["Red Deer"]);
+  assert.deepEqual(options(), []);
+  assert.deepEqual(note(), ["Batatis prepares applications only for Calgary and Edmonton."]);
   h.unmount();
 });
 

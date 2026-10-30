@@ -35,16 +35,17 @@ _TYPES = (
     ('manufacturer literature', re.compile(r'\b(?:brochure|product literature|data ?sheet|installation guide)\b', re.I)),
 )
 _LABELLED = {
-    'issuer': re.compile(r'^\s*(?:issued by|issuer|prepared by|laboratory|author|authored by|company)\s*[:\-]\s*(.+?)\s*$',
+    'issuer': re.compile(r'^[ \t]*(?:issued by|issuer|prepared by|laboratory|author|authored by|company)[ \t]*[:\-][ \t]*(.+?)[ \t]*$',
                          re.I | re.M),
-    'date': re.compile(r'^\s*(?:date(?: of issue)?|issued|dated|issue date|revision date)\s*[:\-]\s*(.+?)\s*$', re.I | re.M),
-    'responsible': re.compile(r'^\s*(?:responsible(?: person| professional)?|signed by|engineer of record|'
-                              r'prepared and sealed by)\s*[:\-]\s*(.+?)\s*$', re.I | re.M),
-    'title': re.compile(r'^\s*(?:title|document|report title)\s*[:\-]\s*(.+?)\s*$', re.I | re.M),
+    'date': re.compile(r'^[ \t]*(?:date(?: of issue)?|issued|dated|issue date|revision date)[ \t]*[:\-][ \t]*(.+?)[ \t]*$', re.I | re.M),
+    'responsible': re.compile(r'^[ \t]*(?:responsible(?: person| professional)?|signed by|engineer of record|'
+                              r'prepared and sealed by)[ \t]*[:\-][ \t]*(.+?)[ \t]*$', re.I | re.M),
+    'title': re.compile(r'^[ \t]*(?:title|document|report title)[ \t]*[:\-][ \t]*(.+?)[ \t]*$', re.I | re.M),
 }
 _DATE_VALUE = re.compile(r'\b(?:\d{4}-\d{2}-\d{2}|\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|[A-Z][a-z]+\s+\d{1,2},\s+\d{4})\b')
 _SEAL = re.compile(r'\b(?:seal(?:ed)?|stamp(?:ed)?|permit to practi[cs]e|APEGA|AAA)\b', re.I)
-_PLACEHOLDER = re.compile(r'^(?:tbd|n/?a|unknown|none|-+|to follow|pending)\.?$', re.I)
+# A blank form line ("____", "- - -") is an empty field, never a value.
+_PLACEHOLDER = re.compile(r'^(?:tbd|n/?a|unknown|none|to follow|pending|[-_.\s]+)\.?$', re.I)
 
 
 def _attr(value: str | None, file: str, page: int | None, quote: str | None, read: ReadFile | None = None,
@@ -134,13 +135,27 @@ def merge_section_d(rows: list[DocumentRow], listed: list[tuple[int, str, str, P
     return out
 
 
+def document_identity(title, *details) -> tuple | None:
+    """Two listings with the same title, author and date are one document. A missing title never merges."""
+    title = ' '.join((title or '').casefold().split())
+    if not title or title.startswith('('):
+        return None
+    return (title, *(' '.join((d or '').casefold().split()) for d in details))
+
+
 def case_rows(case, store=None) -> list[DocumentRow]:
     """Documents panel for a Batatis case: applicant-entered metadata with its fact sources, then file text."""
     from ..process_fields import latest_fact
     from ..section_d import supporting_documents
     from .pdf_reader import read_pdf
-    rows = []
+    rows, seen = [], set()
     for index, doc in enumerate(supporting_documents(case), start=1):
+        # The applicant lists one study once per objective it covers; the officer reads it once.
+        same = document_identity(doc.title, doc.responsible_party, doc.issuer, doc.date)
+        if same in seen:
+            continue
+        if same:
+            seen.add(same)
         prefix = f'evidence.{doc.id}.'
 
         def cell(name, value):

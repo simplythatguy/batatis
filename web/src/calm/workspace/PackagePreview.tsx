@@ -44,8 +44,9 @@ function Page({ id, index, total, official, root, seed, width, height }: {
 }
 
 export function PackagePreview({ official, versionKey, zoom }: { official: boolean; versionKey: string; zoom: number }) {
-  const { engineId, saveDraft, readSync } = useCase();
-  const { locked } = useCurrentApplication();
+  const { engineId, saveDraft, readSync, applicationStatus } = useCase();
+  const { locked, app } = useCurrentApplication();
+  const accepted = (app?.status ?? applicationStatus) === "accepted";
   const [view, setView] = useState<View>({ phase: "loading" });
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
@@ -78,7 +79,7 @@ export function PackagePreview({ official, versionKey, zoom }: { official: boole
   const stale = view.phase === "ready" && view.basis !== versionKey;
   return <section className="aw-package-preview" aria-label="Officer view">
     <div className="aw-preview-bar">
-      <span>{official ? "What the officer receives" : "Draft package"}{view.phase === "ready" ? <span className="aw-meta"> · {view.preview.page_count} pages</span> : null}</span>
+      <span>{official ? accepted ? "Accepted application" : "What the officer receives" : "Draft package"}{view.phase === "ready" ? <span className="aw-meta"> · {view.preview.page_count} pages</span> : null}</span>
       {stale && <button type="button" className="cf-btn is-xs" onClick={() => void load()}><CIcon name="retry" size={12} />Update</button>}
       {pdfUrl && <a className="cf-icon-btn is-plain" href={pdfUrl} target="_blank" rel="noreferrer" title="Open the PDF in a new tab" aria-label="Open the PDF in a new tab"><CIcon name="external" size={14} /></a>}
     </div>

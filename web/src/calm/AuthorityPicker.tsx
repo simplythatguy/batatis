@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { AUTHORITY_LIST_LIMIT, filterAuthorities, type AuthorityOption } from "./authorityFilter";
 import { Icon24 } from "./icons";
-import { knownPlace, resolveOffice } from "../config";
+import { resolveOffice } from "../config";
 import "./AuthorityPicker.css";
 
 /**
@@ -19,14 +19,12 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, plac
   const selected = options.find((o) => o.id === value);
   const { shown, total } = useMemo(() => {
     const filtered = filterAuthorities(options, query ?? "");
-    const text = query?.trim();
-    // Typed text is offered as its own row only for a place Batatis does not know; a known one is already listed.
-    const custom = text && !knownPlace(text) && !options.some((option) => [option.id, option.name, ...(option.aliases ?? [])].some((n) => n.toLowerCase() === text.toLowerCase()))
-      ? [{ id: text, name: text }] : [];
     // The paperwork form has no Not sure: an office is chosen, or the row's Later puts it off.
     const unsureRow = compact ? [] : [{ id: "unsure", name: "Not sure" }];
-    return { shown: [...filtered.shown, ...custom, ...unsureRow], total: filtered.total + custom.length + unsureRow.length };
+    return { shown: [...filtered.shown, ...unsureRow], total: filtered.total + unsureRow.length };
   }, [options, query, compact]);
+  // Another place is never offered as a choice: typing one says at once that Batatis does not prepare its applications.
+  const elsewhere = Boolean(query?.trim()) && !filterAuthorities(options, query ?? "").total;
   const optionId = (n: number) => `${listId}-${n}`;
   // A handful of offices reads as a choice, not a search: no magnifier, the names as the placeholder.
   const few = options.length <= 3;
@@ -56,8 +54,9 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, plac
       setActive((a) => (e.key === "ArrowDown" ? (a + 1) % shown.length : (a - 1 + shown.length) % shown.length));
     } else if (e.key === "Enter" && open) {
       // Enter picks the highlighted office; with the list closed it falls through and continues.
+      // Another place picks nothing: the list already says why.
       e.preventDefault();
-      if (shown[active]) choose(shown[active]);
+      if (shown[active] && !elsewhere) choose(shown[active]);
     } else if (e.key === "Escape" && open) {
       e.preventDefault();
       e.stopPropagation();
@@ -122,11 +121,12 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, plac
               {o.id === value && <span className="cf-ap-check" aria-hidden="true"><Icon24 name="check" size={16} stroke={2} /></span>}
             </li>
           ))}
-          {!shown.length && <li className="cf-ap-note" role="presentation">No match</li>}
+          {elsewhere && <li className="cf-ap-note is-blocked" role="presentation">Batatis prepares applications only for {options.map((o) => o.name).join(" and ")}.</li>}
+          {!shown.length && !elsewhere && <li className="cf-ap-note" role="presentation">No match</li>}
           {total > AUTHORITY_LIST_LIMIT && <li className="cf-ap-note" role="presentation">{shown.length} of {total}. Keep typing.</li>}
         </ul>
       )}
-      <span className="cf-sr" role="status" aria-live="polite">{open && query !== null ? (total === 0 ? "No match" : `${total} ${total === 1 ? "office" : "offices"}`) : ""}</span>
+      <span className="cf-sr" role="status" aria-live="polite">{open && query !== null ? (elsewhere ? `Only ${options.map((o) => o.name).join(" and ")}` : total === 0 ? "No match" : `${total} ${total === 1 ? "office" : "offices"}`) : ""}</span>
     </div>
     {/* Compact (the paperwork sheet): the row's own Later handles deferral. */}
     {!compact && <button type="button" className="cf-link-btn cf-ap-unsure" aria-pressed={unsure} onClick={() => choose({ id: "unsure", name: "Not sure" })}>Not sure</button>}

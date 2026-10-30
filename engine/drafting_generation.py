@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import Field, ValidationError
 
+from .anthropic_json import UnreadableJson
 from .drafting_provider import DraftingProvider, DraftingUnavailable
 from .drafting_sources import ARTICLE, TITLES, SourceBundle
 from .models import new_id, now
@@ -120,12 +121,14 @@ REFERENCES = re.compile('|'.join((ARTICLE.pattern, ATTRIBUTIONS.pattern, r'\(\d{
 
 
 def allowed_articles(bundle: SourceBundle) -> set[str]:
-    return {source.metadata['provision_id'].rstrip('.') for source in bundle.sources
-            if source.kind in {'code', 'section_c'} and source.metadata.get('provision_id')}
+    """Confirmed provisions, and the Article each confirmed Sentence belongs to ("3.2.2.62" for "3.2.2.62.(1)")."""
+    ids = {source.metadata['provision_id'].rstrip('.') for source in bundle.sources
+           if source.kind in {'code', 'section_c'} and source.metadata.get('provision_id')}
+    return ids | {pid.split('(')[0].rstrip('.') for pid in ids}
 
 
-def _items(batch: GeneratedBatch):
-    for draft in batch.drafts:
+def _items(drafts: list[GeneratedField]):
+    for draft in drafts:
         for index, claim in enumerate(draft.claims):
             yield f'{draft.field}#claim:{index}', claim, claim.text, {
                 'fact': 'applicant_fact', 'assumption': 'labelled_assumption', 'plan': 'requested_work'}[claim.kind]
@@ -159,41 +162,46 @@ def _item_problem(key, item, text, bundle: SourceBundle, sources, articles, attr
     return None
 
 
-def without(batch: GeneratedBatch, keys: set[str]) -> GeneratedBatch:
-    """The batch without the claims and questions with these keys."""
-    return GeneratedBatch(drafts=[GeneratedField(
+def without(drafts: list[GeneratedField], keys: set[str]) -> list[GeneratedField]:
+    """The fields without the claims and questions with these keys."""
+    return [GeneratedField(
         field=d.field,
         claims=[c for i, c in enumerate(d.claims) if f'{d.field}#claim:{i}' not in keys],
         questions=[q for i, q in enumerate(d.questions) if f'{d.field}#question:{i}' not in keys])
-        for d in batch.drafts])
+        for d in drafts]
 
 
-def check_fields(batch: GeneratedBatch, bundle: SourceBundle, removed: dict[str, str]) -> None:
-    """Every requested field keeps at least one item, grounded in this project. Raises the reason otherwise."""
+def field_problems(drafts: list[GeneratedField], bundle: SourceBundle, removed: dict[str, str]) -> dict[str, str]:
+    """Why each field may not be saved: nothing left in it, or nothing in it grounded in this project."""
     sources = {s.id: s for s in bundle.sources}
-    for draft in batch.drafts:
+    problems = {}
+    for draft in drafts:
         if not draft.claims and not draft.questions:
             why = [m for k, m in removed.items() if k.startswith(draft.field + '#')]
-            raise ValueError(f'{draft.field} has nothing left that may be saved' + (': ' + '; '.join(why) if why else ''))
+            problems[draft.field] = f'{draft.field} has nothing left that may be saved' + (': ' + '; '.join(why) if why else '')
+            continue
         used = [sources.get(c.source_id) for part in [*draft.claims, *draft.questions] for c in part.sources]
         if not any(s and s.kind in {'description', 'fact', 'document'} for s in used):
-            raise ValueError(f'{draft.field} must cite at least one description, fact or document source')
+            problems[draft.field] = f'{draft.field} must cite at least one description, fact or document source'
+    return problems
 
 
-def validate(batch: GeneratedBatch, bundle: SourceBundle) -> tuple[GeneratedBatch, dict[str, str]]:
-    """The batch without any item that breaks a rule, and why each removed item was removed.
-
-    A broken item is dropped, never saved; a field left empty or ungrounded rejects the batch."""
-    if len(batch.drafts) != len(bundle.inputs.fields) or {d.field for d in batch.drafts} != set(bundle.inputs.fields):
-        raise ValueError('generated fields must exactly match the requested unfilled fields')
+def validate(batch: GeneratedBatch, bundle: SourceBundle, fields: list[str]
+             ) -> tuple[list[GeneratedField], dict[str, str], dict[str, str]]:
+    """The requested fields that may be saved, without any item that breaks a rule; why each removed item
+    was removed; and why each other requested field may not be saved (missing, repeated, empty or ungrounded)."""
+    returned = [d.field for d in batch.drafts]
+    failed = {f: f'{f} was not returned' for f in fields if f not in returned}
+    failed |= {f: f'{f} was returned more than once' for f in fields if returned.count(f) > 1}
+    drafts = [d for d in batch.drafts if d.field in fields and d.field not in failed]
     sources = {s.id: s for s in bundle.sources}
     articles = allowed_articles(bundle)
     attributions = set(ATTRIBUTIONS.findall('\n'.join(s.text for s in bundle.sources if s.kind in {'code', 'section_c'})))
-    removed = {key: problem for key, item, text, _ in _items(batch)
+    removed = {key: problem for key, item, text, _ in _items(drafts)
                if (problem := _item_problem(key, item, text, bundle, sources, articles, attributions))}
-    kept = without(batch, set(removed))
-    check_fields(kept, bundle, removed)
-    return kept, removed
+    kept = without(drafts, set(removed))
+    failed |= field_problems(kept, bundle, removed)
+    return [d for d in kept if d.field not in failed], removed, failed
 
 
 def _usage(usage: dict, name: str) -> int | None:
@@ -214,61 +222,87 @@ def _add_usage(total: dict, step: dict) -> dict:
     return out
 
 
+def _audit(drafts: list[GeneratedField], provider: DraftingProvider, context: dict
+           ) -> tuple[list[GeneratedField], dict[str, str], dict]:
+    """Drop each item the independent audit does not find supported by its own quotes, like a rule break."""
+    keyed = [{'key': key, 'text': text, 'kind': boundary, 'sources': [s.model_dump() for s in item.sources]}
+             for key, item, text, boundary in _items(drafts)]
+    raw_audit, step = provider.call('applicant_draft_audit', AUDIT_SYSTEM,
+        json.dumps({**context, 'items': keyed}, ensure_ascii=False), AuditBatch.model_json_schema())
+    audit = AuditBatch.model_validate(raw_audit)
+    expected = {key: (item, boundary) for key, item, _, boundary in _items(drafts)}
+    if len(audit.items) != len(expected) or {a.key for a in audit.items} != set(expected):
+        raise ValueError('the audit did not return one verdict per item')
+    failed = {item.key: f'{item.key}: the audit found it unsupported by its quotes' for item in audit.items
+              if not item.supported or item.boundary != expected[item.key][1]
+              or set(item.source_ids) != {s.source_id for s in expected[item.key][0].sources}}
+    return without(drafts, set(failed)), failed, step
+
+
+def _title(field: str) -> str:
+    return TITLES.get(field, 'Provision ' + field.removeprefix('section_c.').removesuffix('.explanation'))
+
+
 def generate(bundle: SourceBundle, provider: DraftingProvider) -> DraftingRecord:
     context = {'fields': bundle.inputs.fields, 'professional_required': bundle.inputs.professional_required,
                'allowed_articles': sorted(allowed_articles(bundle)),
                'sources': [s.model_dump() for s in bundle.sources], 'notices': bundle.notices}
-    try:
-        # One slip rejects the whole batch, so a rejected batch is written again, told what was wrong with it.
-        usage, audit_usage, rejected = {}, {}, None
-        for attempt in range(GENERATION_ATTEMPTS):
-            try:
-                request = {**context, 'previous_attempt_rejected_because': rejected} if rejected else context
-                raw, step = provider.call('applicant_drafts', SYSTEM, json.dumps(request, ensure_ascii=False),
-                                          GeneratedBatch.model_json_schema())
-                usage = _add_usage(usage, step)
-                batch, removed = validate(GeneratedBatch.model_validate(raw), bundle)
-                keyed = [{'key': key, 'text': text, 'kind': boundary, 'sources': [s.model_dump() for s in item.sources]}
-                         for key, item, text, boundary in _items(batch)]
-                raw_audit, step = provider.call('applicant_draft_audit', AUDIT_SYSTEM,
-                    json.dumps({**context, 'items': keyed}, ensure_ascii=False), AuditBatch.model_json_schema())
+    # A field that passes is kept; only the fields that failed are written again, told why. One field's
+    # slip never discards the others, and a field still failing after the last attempt is left unwritten.
+    done: dict[str, GeneratedField] = {}
+    failed: dict[str, str] = {}
+    usage, audit_usage, last_error = {}, {}, None
+    for attempt in range(GENERATION_ATTEMPTS):
+        pending = [f for f in bundle.inputs.fields if f not in done]
+        request = {**context, 'fields': pending}
+        if failed:
+            request['previous_attempt_rejected_because'] = '; '.join(dict.fromkeys(failed[f] for f in pending if f in failed))
+        try:
+            raw, step = provider.call('applicant_drafts', SYSTEM, json.dumps(request, ensure_ascii=False),
+                                      GeneratedBatch.model_json_schema())
+            usage = _add_usage(usage, step)
+            drafts, removed, failed = validate(GeneratedBatch.model_validate(raw), bundle, pending)
+            if drafts:
+                drafts, unsupported, step = _audit(drafts, provider, {**context, 'fields': pending})
                 audit_usage = _add_usage(audit_usage, step)
-                audit = AuditBatch.model_validate(raw_audit)
-                expected = {key: (item, boundary) for key, item, _, boundary in _items(batch)}
-                if len(audit.items) != len(expected) or {a.key for a in audit.items} != set(expected):
-                    raise ValueError('the audit did not return one verdict per item')
-                # An item the audit does not find supported by its own quotes is dropped like a rule break.
-                failed = {item.key: f'{item.key}: the audit found it unsupported by its quotes' for item in audit.items
-                          if not item.supported or item.boundary != expected[item.key][1]
-                          or set(item.source_ids) != {s.source_id for s in expected[item.key][0].sources}}
-                removed |= failed
-                batch = without(batch, set(failed))
-                check_fields(batch, bundle, removed)
-                if removed:      # keys only: the model's own reasons can quote the applicant's text
-                    _log.info('draft attempt %d dropped %s', attempt + 1, ', '.join(sorted(removed)))
-                break
-            except ValueError as error:
-                rejected = 'the output did not match the schema' if isinstance(error, ValidationError) else str(error)
-                _log.warning('draft attempt %d rejected: %s', attempt + 1, rejected)
-                if attempt + 1 == GENERATION_ATTEMPTS:
-                    raise
-    except Exception as error:
-        # Provider text/errors can contain private input. Never expose the raw payload, or save a partial batch.
-        raise DraftingUnavailable('Drafting unavailable: generation or grounding validation failed; no writing was saved.') from error
+                removed |= unsupported
+                later = field_problems(drafts, bundle, removed)
+                failed |= later
+                drafts = [d for d in drafts if d.field not in later]
+            done.update((d.field, d) for d in drafts)
+            if removed:      # keys only: the model's own reasons can quote the applicant's text
+                _log.info('draft attempt %d dropped %s', attempt + 1, ', '.join(sorted(removed)))
+            if failed:
+                _log.warning('draft attempt %d left unwritten: %s', attempt + 1, '; '.join(failed.values()))
+        except (ValueError, UnreadableJson) as error:
+            reason = 'the output did not match the schema' if isinstance(error, ValidationError) else str(error)
+            failed = dict.fromkeys(pending, reason)
+            last_error = error
+            _log.warning('draft attempt %d rejected: %s', attempt + 1, reason)
+        except Exception as error:
+            # A provider or transport failure is not retried. Its text can contain private input: never expose it.
+            last_error = error
+            break
+        if len(done) == len(bundle.inputs.fields):
+            break
+    if not done:
+        raise DraftingUnavailable('Drafting unavailable: generation or grounding validation failed; no writing was saved.') from last_error
+    batch = [done[field] for field in bundle.inputs.fields if field in done]
+    unwritten = [field for field in bundle.inputs.fields if field not in done]
+    notices = bundle.notices + ([f'Not drafted this time: {", ".join(_title(f) for f in unwritten)}. '
+                                 'Draft again, or write it yourself.'] if unwritten else [])
     timestamp, generation_id = now(), new_id('draft_generation')
-    by_field = {d.field: d for d in batch.drafts}
     drafts = [WordingDraft(id=new_id('draft'), generation_id=generation_id,
-        input_fingerprint=bundle.inputs.fingerprint, field=d.field,
-        title=TITLES.get(d.field, 'Provision ' + d.field.removeprefix('section_c.').removesuffix('.explanation')),
+        input_fingerprint=bundle.inputs.fingerprint, field=d.field, title=_title(d.field),
         text=assembled_text(d.claims), claims=d.claims, questions=d.questions, generated_at=timestamp,
         replaces_fact_id=bundle.inputs.replacements.get(d.field))
-        for d in (by_field[field] for field in bundle.inputs.fields)]
+        for d in batch]
     generation = DraftGeneration(id=generation_id, generated_at=timestamp, provider=provider.provider,
         model=provider.model, effort=provider.effort, auditor_model=provider.model,
         input_tokens=_usage(usage, 'input_tokens'), output_tokens=_usage(usage, 'output_tokens'),
         audit_input_tokens=_usage(audit_usage, 'input_tokens'), audit_output_tokens=_usage(audit_usage, 'output_tokens'))
     return DraftingRecord(input_fingerprint=bundle.inputs.fingerprint, generated_at=timestamp,
         sources=bundle.sources, drafts=drafts, generations=[generation],
-        registry_searches=bundle.registry_searches, registry_queries=bundle.registry_queries, notices=bundle.notices,
+        registry_searches=bundle.registry_searches, registry_queries=bundle.registry_queries, notices=notices,
         generated_texts=list(dict.fromkeys(text for draft in drafts for text in draft_passages(draft) if text.strip())),
         source_history=[s for s in bundle.sources if s.kind in {'fact', 'description', 'document'}])

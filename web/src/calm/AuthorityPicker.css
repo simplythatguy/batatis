@@ -144,6 +144,11 @@
   font: 400 13px/1.4 var(--cf-font);
 }
 
+/* Why a typed place is not offered: a reason, so it reads in ink. */
+.cf-ap-note.is-blocked {
+  color: var(--cf-text-2);
+}
+
 .cf-ap-unsure {
   margin-top: 16px;
 }

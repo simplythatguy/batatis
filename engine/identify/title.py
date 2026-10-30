@@ -78,6 +78,28 @@ _SUBJECTS = tuple((re.compile(pattern, re.I), label) for pattern, label in (
 ))
 
 
+# What the applicant calls the building, so two applications about the same subject read apart
+# ("Rowhouse fire separation", "Office sprinklers"). More specific names come first; a plain house,
+# the usual case, adds nothing.
+_KINDS = tuple((re.compile(pattern, re.I), label) for pattern, label in (
+    (r'\b(?:row[- ]?houses?|town[- ]?(?:houses?|homes?))\b', 'Rowhouse'),
+    (r'\b(?:duplex|semi[- ]detached)\b', 'Duplex'),
+    (r'\b(?:apartments?|condo(?:minium)?s?)\b', 'Apartment'),
+    (r'\boffices?\b', 'Office'),
+    (r'\bschools?\b', 'School'),
+    (r'\bwarehouses?\b', 'Warehouse'),
+    (r'\brestaurants?\b', 'Restaurant'),
+    (r'\bhotels?\b', 'Hotel'),
+    (r'\bgarages?\b', 'Garage'),
+))
+
+
+def _kind(prose: str) -> str | None:
+    matches = [(match.start(), order, label) for order, (pattern, label) in enumerate(_KINDS)
+               if (match := pattern.search(prose or ''))]
+    return min(matches)[2] if matches else None
+
+
 def normalize_title(value: str) -> str:
     """Keep custom wording and Unicode; collapse whitespace without clipping it."""
     if not isinstance(value, str):
@@ -154,6 +176,8 @@ def short_title(prose: str, facts, result: dict | None) -> str:
         matches = [(match.start(), order, label) for order, (pattern, label) in enumerate(_SUBJECTS)
                    if (match := pattern.search(blob))]
         if matches:
-            return min(matches)[2]
+            subject = min(matches)[2]
+            kind = _kind(' '.join(blobs))
+            return f'{kind} {subject[0].lower()}{subject[1:]}' if kind else subject
     kind = _building_type(' '.join(blobs), accepted)
     return kind or 'Variance application'

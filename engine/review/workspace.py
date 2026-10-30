@@ -5,6 +5,7 @@ of its own; a dismissal changes the officer's record, never the automated findin
 """
 from __future__ import annotations
 
+from .information_request import covered as asked_already
 from ..models_review import (AcceptGate, FindingState, RequestTarget, ReviewSession, ReviewTally,
                              RulebookGap, OfficerWorkspace)
 
@@ -26,12 +27,14 @@ def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool =
     rulebook = [RulebookGap(id=g.id, field=g.field, section=g.section, message=g.message)
                 for g in blocking if not g.field or g.field not in covered]
     linked = {item.finding_key for item in session.information_request.items if item.finding_key}
+    # A topic an open drafted question already asks is the officer's to check, not a second request.
+    repeats = asked_already(findings)
     dispositions = {d.key: d for d in session.dispositions}
     states = []
     for finding in findings:
         locked = finding.field in locked_fields
         default = ('ask' if finding.routed_to == 'applicant' and finding.status != 'not_found'
-                   and finding.key in linked else 'verify')
+                   and finding.key in linked and finding.key not in repeats else 'verify')
         disposition = dispositions.get(finding.key)
         state = FindingState(key=finding.key, state=default, locked=locked)
         if disposition is not None:

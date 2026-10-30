@@ -79,6 +79,22 @@ export function officeSuggestion(c: Case): { id: string; name: string } | null {
   return AUTHORITIES.filter((place) => last(place) >= 0).sort((a, b) => last(b) - last(a))[0] ?? null;
 }
 
+/**
+ * The place the application is for when Batatis does not prepare applications there ("Red Deer"): the chosen
+ * office, else the site's municipality, else the city part of the site address. Null for Calgary, Edmonton or unknown.
+ */
+export function siteElsewhere(c: Case): string | null {
+  if (c.authority) return officeCovered(c.authority) === false ? resolveOffice(c.authority)?.name ?? c.authority : null;
+  if (officeSuggestion(c)) return null;
+  const latest = (fields: string[]) => [...c.facts].reverse().find((fact) => fields.includes(fact.field) && typeof fact.value === "string" && fact.value.trim())?.value as string | undefined;
+  const municipality = latest(["municipality"]);
+  if (municipality) return knownPlace(municipality) ? null : municipality.trim();
+  // "4920 51 Street, Red Deer AB T4N 2A8": the part after the street, without province and postal code.
+  const city = latest(["municipalAddress", "municipal_address", "civic_address", "address"])?.split(",").slice(1).map((part) => part
+    .replace(/\s*\b(?:AB|Alta\.?|Alberta)\b\s*(?:[A-Z]\d[A-Z]\s?\d[A-Z]\d)?\s*$/i, "").trim()).find((part) => /^[A-Za-z][A-Za-z .'-]+$/.test(part));
+  return city && !knownPlace(city) ? city : null;
+}
+
 export function submissionOfficeReason(c: Case): string {
   if (!c.authority) return "Choose a reviewing office.";
   const office = resolveOffice(c.authority);
