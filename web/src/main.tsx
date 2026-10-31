@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import "@fontsource-variable/inter/opsz.css";
 import "@fontsource-variable/geist-mono";
@@ -28,6 +29,7 @@ if (location.pathname.startsWith("/studio")) {
     <StrictMode>
       <CaseProvider>
         <App />
+        <Analytics />
         <SpeedInsights />
       </CaseProvider>
     </StrictMode>,
